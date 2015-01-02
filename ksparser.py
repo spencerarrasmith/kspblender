@@ -1,5 +1,5 @@
-# KSPBlender 1.02
-# 12/28/14
+# KSPBlender 1.04
+# 1/1/15
 # Spencer Arrasmith
 
 
@@ -559,90 +559,90 @@ def import_parts_old(partslist,ksp):
 def import_parts(partslist,ksp):
     """Imports parts from the ksp directory"""
     
-    doneparts = {}
-    doneobj = set(bpy.data.objects)
-    scn = bpy.context.scene
+    doneparts = {}                                                                                          # keep track of parts that have already been imported so I can save time
+    doneobj = set(bpy.data.objects)                                                                         # know which objects have gone through the cleaning process
+    scn = bpy.context.scene                                                                                 # the active scene
     
     for part in partslist:
-        if os.path.isfile(ksp+partdir[part.partName]):
-            print("\n----------------------------------------------------\n")
-            if part.partName not in doneparts:
-                print("Importing "+part.partName)
+        if os.path.isfile(ksp+partdir[part.partName]):                                                      # make sure the part file exists so nothing crashes
+            print("\n----------------------------------------------------\n")                               # to make console output easier to look at
+            if part.partName not in doneparts:                                                              # if part has not been imported...
+                print("Importing "+part.partName)                                                               # ...say so on the console
                 print("\n")
-                bpy.ops.import_object.ksp_mu(filepath=ksp+partdir[part.partName])
-                newpart = bpy.context.active_object
-                newpart.name = part.part
-                newpart.location = part.pos
-                newpart.rotation_quaternion = part.rotQ
-            else:
-                hiddenlist = []
-                for obj in bpy.data.objects:
-                    if not obj.is_visible(scn):
-                        hiddenlist.append(obj)
-                        scn.objects.active = obj
-                        obj.hide = False
-                bpy.ops.object.select_all(action = 'DESELECT')
-                print("Duplicating "+part.partName+"\n")
-                oldpart = bpy.data.objects[doneparts[part.partName]]
+                bpy.ops.import_object.ksp_mu(filepath=ksp+partdir[part.partName])                               # call the importer
+                newpart = bpy.context.active_object                                                             # set the imported part object to active. from here on, part refers to the part data structure and object to the blender object
+                newpart.name = part.part                                                                        # rename the object according to the part name (including the number)
+                newpart.location = part.pos                                                                     # move the object
+                newpart.rotation_quaternion = part.rotQ                                                         # rotate the object
+            else:                                                                                           # but if part has been imported...
+                hiddenlist = []                                                                                 # clunky workaround
+                for obj in bpy.data.objects:                                                                    # hidden objects cannot be modified (duplication is what I want to do)
+                    if not obj.is_visible(scn):                                                                     # find all hidden objects
+                        hiddenlist.append(obj)                                                                      # create a big stupid list
+                        scn.objects.active = obj                                                                    # always need to do this to get things to actually happen to objects
+                        obj.hide = False                                                                            # unhide each one
+                bpy.ops.object.select_all(action = 'DESELECT')                                                  # deselect everything
+                print("Duplicating "+part.partName+"\n")                                                        # let me know if the part is just being duplicated
+                oldpart = bpy.data.objects[doneparts[part.partName]]                                            # have to select the object (2 step process)
                 oldpart.select = True
                 bpy.context.scene.objects.active = oldpart
-                bpy.ops.object.select_grouped(type = 'CHILDREN_RECURSIVE')
-                bpy.data.objects[doneparts[part.partName]].select = True
-                bpy.ops.object.duplicate_move_linked()
-                copiedpart = doneparts[part.partName] + ".001"
-                print(copiedpart)
-                bpy.ops.object.select_all(action = 'DESELECT')
-                time.sleep(.1)
-                newpart = bpy.data.objects[copiedpart]
+                bpy.ops.object.select_grouped(type = 'CHILDREN_RECURSIVE')                                      # select all children of the parent object (the empty), which deselects the parent
+                bpy.data.objects[doneparts[part.partName]].select = True                                        # so reselect the parent
+                
+                bpy.ops.object.duplicate_move_linked()                                                          # duplicate the whole family
+                copiedpart = doneparts[part.partName] + ".001"                                                  # the duplicate will be called part.part.001 always
+                bpy.ops.object.select_all(action = 'DESELECT')                                                  # deselect everything
+                newpart = bpy.data.objects[copiedpart]                                                          # and select just the parent (again, multi-step process)
                 newpart.select = True
                 bpy.context.scene.objects.active = newpart
                 print(bpy.context.active_object)
-                newpart.name = part.part
-                newpart.location = part.pos
-                newpart.rotation_quaternion = part.rotQ
-                for obj in hiddenlist:
+                newpart.name = part.part                                                                        # rename it
+                newpart.location = part.pos                                                                     # move it
+                newpart.rotation_quaternion = part.rotQ                                                         # rotate it
+                for obj in hiddenlist:                                                                          # hide all that annoying stuff again
                     obj.hide = True
         
         else:
-            print("Failed to load "+part.partName+"... gotta fix that\n")
+            print("Failed to load "+part.partName+"... gotta fix that\n")                                   # if the part doesn't exist, let me know
         
-        objlist = set([obj for obj in bpy.data.objects if obj not in doneobj])
-        doneobj = set(bpy.data.objects)
+        objlist = set([obj for obj in bpy.data.objects if obj not in doneobj])                              # find all the newly added objects
+        doneobj = set(bpy.data.objects)                                                                     # done dealing with all the objects that are now in the scene (except for the ones I'm about to work with in objlist)
         
-        if part.partName not in doneparts:
-            doneparts[part.partName] = part.part
-            for obj in objlist:
-                print(obj.name)
-                if obj.type == 'EMPTY':
-                    if obj.parent != None: #hide all those annoying little empties everywhere
-                        obj.hide = True
-                        print(obj.name + " Hidden\n")
-                    else:
-                        obj.empty_draw_type = 'SPHERE'
-                        obj.empty_draw_size = 0
-                if obj.type == 'MESH':
-                    scn.objects.active = obj
-                    bpy.ops.object.mode_set(mode='EDIT')
-                    bpy.ops.mesh.remove_doubles(threshold = 0.0001)
-                    bpy.ops.mesh.normals_make_consistent(inside = False)
-                    bpy.ops.object.mode_set(mode='OBJECT')
-                    if len(obj.data.polygons) == 0:
-                        obj.hide = True
-                        
-                    maxrad = math.sqrt((obj.dimensions[0]/2)**2 + (obj.dimensions[1]/2)**2 + (obj.dimensions[2]/2)**2)
-                    root = obj
-                    while root.parent != None:
-                        root = root.parent
-                    if root.empty_draw_size < maxrad:
-                        root.empty_draw_size = maxrad
+        if part.partName not in doneparts:                                                                  # if the part hasn't been imported before...
+            doneparts[part.partName] = part.part                                                            # ...it has now
+            
+        for obj in objlist:                                                                                 # for all the unprocesses objects
+            print(obj.name)                                                                                     # let me know which one we're on
+            if obj.type == 'EMPTY':                                                                             # if it's an Empty object
+                if obj.parent != None:                                                                              # if the Empty is not top-level
+                    obj.hide = True                                                                                     # hide that shyet
+                    print(obj.name + " Hidden\n")                                                                       # and tell me that they're gone
+                else:                                                                                               # but if it is top level
+                    obj.empty_draw_type = 'SPHERE'                                                                      # make that shyet a sphere
+                    obj.empty_draw_size = 0                                                                             # a hella tiny sphere
+            if obj.type == 'MESH':                                                                              # if it's a Mesh object
+                scn.objects.active = obj                                                                            # make it active
+                bpy.ops.object.mode_set(mode='EDIT')                                                                # go into edit mode
+                bpy.ops.mesh.remove_doubles(threshold = 0.0001)                                                     # remove double vertices
+                bpy.ops.mesh.normals_make_consistent(inside = False)                                                # fix normals
+                bpy.ops.object.mode_set(mode='OBJECT')                                                              # leave edit mode
+                if len(obj.data.polygons) == 0:                                                                     # and if it's one of them stupid fake meshes with no faces
+                    obj.hide = True                                                                                 # gtfo
                     
-                if "coll" in obj.name or "COL" in obj.name or "fair" in obj.name and 'KSP' not in obj.name:
-                    obj.hide = True
-                    obj.hide_render = True
-                    #object.select = True
-                    #bpy.ops.object.delete()
-                    if obj.type != 'EMPTY':
-                        print(obj.name + " Hidden\n")
+                maxrad = math.sqrt((obj.dimensions[0]/2)**2 + (obj.dimensions[1]/2)**2 + (obj.dimensions[2]/2)**2)  # find the radius of the parent Empty such that it encloses the object
+                root = obj
+                while root.parent != None:                                                                          # need to navigate to the uppermost parent
+                    root = root.parent                                                                                  # and I can do it by jumping from child to parent until there is no parent
+                if root.empty_draw_size < maxrad:                                                                   # make the empty big enough to enclose the biggest mesh found
+                    root.empty_draw_size = maxrad                                                                       # and only update it if it's increasing in size (starts at 0, so it definitely should)
+                
+            if "coll" in obj.name or "COL" in obj.name or "fair" in obj.name and 'KSP' not in obj.name:         # if it is named anything to do with collider, I'll have none of it
+                obj.hide = True                                                                                     # gtfo
+                obj.hide_render = True                                                                              # really gtfo (don't even render)
+                #object.select = True                                                                               # and if I'm really mad
+                #bpy.ops.object.delete()                                                                            # I could just delete it
+                if obj.type != 'EMPTY':                                                                             # and if it is a mesh (the empties have already been hidden, so this is a double-tap on them)...
+                    print(obj.name + " Hidden\n")                                                                       # ...let me know
         
             
     
