@@ -559,9 +559,9 @@ def import_parts_old(partslist,ksp):
             print("Failed to load "+part.partName+"... gotta fix that")
     for object in bpy.data.objects:
         if object.type == 'MESH' and "KSP" not in object.name:
-            #while len(object.data.materials) > 0:
-                #object.data.materials.pop(0, update_data=True)
-                #bpy.ops.object.material_slot_remove()
+            while len(object.data.materials) > 0:
+                object.data.materials.pop(0, update_data=True)
+                bpy.ops.object.material_slot_remove()
             if "coll" in object.name or "COL" in object.name or "fair" in object.name:
                 object.hide = True
                 object.hide_render = True
@@ -657,6 +657,10 @@ def import_parts(partslist,ksp):
                     obj.empty_draw_size = 0                                                                             # a hella tiny sphere
             if obj.type == 'MESH':                                                                              # if it's a Mesh object
                 scn.objects.active = obj                                                                            # make it active
+                if "KSP" not in obj.name:
+                    while len(obj.data.materials) > 0:
+                        obj.data.materials.pop(0, update_data=True)
+                        bpy.ops.object.material_slot_remove()
                 bpy.ops.object.mode_set(mode='EDIT')                                                                # go into edit mode
                 bpy.ops.mesh.remove_doubles(threshold = 0.0001)                                                     # remove double vertices
                 bpy.ops.mesh.normals_make_consistent(inside = False)                                                # fix normals
