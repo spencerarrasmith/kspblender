@@ -3,9 +3,13 @@
 # Spencer Arrasmith
 
 
-import os, string
+import os, string, time
 import bpy, mathutils, math
 os.chdir("C:\\Users\\Spencer.Satan-PC\\Art\\Projects\\ksp\\kspblender") # current working directory... need to have the .craft file in this same folder for now
+
+#FIGURE OUT A BETTER WAY TO MANAGE OPENING CONSOLE
+#bpy.ops.wm.console_toggle()
+
 
 kspexedirectory = "S:\\Games\\SteamApps\\common\\Kerbal Space Program"
 
@@ -526,7 +530,7 @@ def add_parts(partslist):
         scn.objects.active = ob
         ob.select = True
         
-def import_parts(partslist,ksp):
+def import_parts_old(partslist,ksp):
     """Imports parts from the ksp directory"""
     for part in partslist:
         if os.path.isfile(ksp+partdir[part.partName]):
@@ -541,8 +545,8 @@ def import_parts(partslist,ksp):
             print("Failed to load "+part.partName+"... gotta fix that")
     for object in bpy.data.objects:
         if object.type == 'MESH' and "KSP" not in object.name:
-            while len(object.data.materials) > 0:
-                object.data.materials.pop(0, update_data=True)  #still deleting lights, need to fix that
+            #while len(object.data.materials) > 0:
+                #object.data.materials.pop(0, update_data=True)
                 #bpy.ops.object.material_slot_remove()
             if "coll" in object.name or "COL" in object.name or "fair" in object.name:
                 object.hide = True
@@ -552,11 +556,117 @@ def import_parts(partslist,ksp):
                 print(object.name + " Hidden")
 
 
+def import_parts(partslist,ksp):
+    """Imports parts from the ksp directory"""
+    
+    doneparts = {}
+    doneobj = set(bpy.data.objects)
+    scn = bpy.context.scene
+    
+    for part in partslist:
+        if os.path.isfile(ksp+partdir[part.partName]):
+            print("\n----------------------------------------------------\n")
+            if part.partName not in doneparts:
+                print("Importing "+part.partName)
+                print("\n")
+                bpy.ops.import_object.ksp_mu(filepath=ksp+partdir[part.partName])
+                newpart = bpy.context.active_object
+                newpart.name = part.part
+                newpart.location = part.pos
+                newpart.rotation_quaternion = part.rotQ
+            else:
+                hiddenlist = []
+                for obj in bpy.data.objects:
+                    if not obj.is_visible(scn):
+                        hiddenlist.append(obj)
+                        scn.objects.active = obj
+                        obj.hide = False
+                bpy.ops.object.select_all(action = 'DESELECT')
+                print("Duplicating "+part.partName+"\n")
+                oldpart = bpy.data.objects[doneparts[part.partName]]
+                oldpart.select = True
+                bpy.context.scene.objects.active = oldpart
+                bpy.ops.object.select_grouped(type = 'CHILDREN_RECURSIVE')
+                bpy.data.objects[doneparts[part.partName]].select = True
+                bpy.ops.object.duplicate_move_linked()
+                copiedpart = doneparts[part.partName] + ".001"
+                print(copiedpart)
+                bpy.ops.object.select_all(action = 'DESELECT')
+                time.sleep(.1)
+                newpart = bpy.data.objects[copiedpart]
+                newpart.select = True
+                bpy.context.scene.objects.active = newpart
+                print(bpy.context.active_object)
+                newpart.name = part.part
+                newpart.location = part.pos
+                newpart.rotation_quaternion = part.rotQ
+                for obj in hiddenlist:
+                    obj.hide = True
+        
+        else:
+            print("Failed to load "+part.partName+"... gotta fix that\n")
+        
+        objlist = set([obj for obj in bpy.data.objects if obj not in doneobj])
+        doneobj = set(bpy.data.objects)
+        
+        if part.partName not in doneparts:
+            doneparts[part.partName] = part.part
+            for obj in objlist:
+                print(obj.name)
+                if obj.type == 'EMPTY':
+                    if obj.parent != None: #hide all those annoying little empties everywhere
+                        obj.hide = True
+                        print(obj.name + " Hidden\n")
+                    else:
+                        obj.empty_draw_type = 'SPHERE'
+                        obj.empty_draw_size = 0
+                if obj.type == 'MESH':
+                    scn.objects.active = obj
+                    bpy.ops.object.mode_set(mode='EDIT')
+                    bpy.ops.mesh.remove_doubles(threshold = 0.0001)
+                    bpy.ops.mesh.normals_make_consistent(inside = False)
+                    bpy.ops.object.mode_set(mode='OBJECT')
+                    if len(obj.data.polygons) == 0:
+                        obj.hide = True
+                        
+                    maxrad = math.sqrt((obj.dimensions[0]/2)**2 + (obj.dimensions[1]/2)**2 + (obj.dimensions[2]/2)**2)
+                    root = obj
+                    while root.parent != None:
+                        root = root.parent
+                    if root.empty_draw_size < maxrad:
+                        root.empty_draw_size = maxrad
+                    
+                if "coll" in obj.name or "COL" in obj.name or "fair" in obj.name and 'KSP' not in obj.name:
+                    obj.hide = True
+                    obj.hide_render = True
+                    #object.select = True
+                    #bpy.ops.object.delete()
+                    if obj.type != 'EMPTY':
+                        print(obj.name + " Hidden\n")
+        
+            
+    
 def run():
     """runs"""
-    mycraft = kspcraft('ALLPARTS2.craft')
-    print(mycraft.num_parts())
+    mycraft = kspcraft('Kerbal 2.craft')
+    print("\n")
+    print("         A          ")
+    print("        / \\        ")
+    print("       | 0 |        ")
+    print("       |___|        ")
+    print("       |___|        ")
+    print("       |KSP|        ")
+    print("      /|   |\\      ")
+    print("     /| \\_/ |\\    ")
+    print("    /_|  W  |_\\    ")
+    print("       @WWW@        ")
+    print("     @@WWWWW@@      ")
+    print("    @ @@@@ @@@ @    ")
+    print("  @   @  @@  @   @  ")
+    print("\n")
+    print(str(mycraft.num_parts()) + ' parts found...')
     #add_parts(mycraft.partslist)
+    
     import_parts(mycraft.partslist,kspexedirectory)
     return mycraft
 
