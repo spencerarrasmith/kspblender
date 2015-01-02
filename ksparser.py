@@ -2,6 +2,9 @@
 # 1/1/15
 # Spencer Arrasmith
 
+#############################
+### IMPORT STUFF
+#############################
 
 import os, string, time
 import bpy, mathutils, math
@@ -10,6 +13,9 @@ os.chdir("C:\\Users\\Spencer.Satan-PC\\Art\\Projects\\ksp\\kspblender") # curren
 #FIGURE OUT A BETTER WAY TO MANAGE OPENING CONSOLE
 #bpy.ops.wm.console_toggle()
 
+#############################
+### DIRECTORY STUFF
+#############################
 
 kspexedirectory = "S:\\Games\\SteamApps\\common\\Kerbal Space Program"
 
@@ -19,251 +25,255 @@ def partdirectory():
     partdir = {}
     
     # Pods
-    partdir['mk1pod']                   = "\\GameData\\Squad\\Parts\\Command\\mk1pod\\model.mu"
-    partdir['seatExternalCmd']          = "\\GameData\\Squad\\Parts\\Command\\externalCommandSeat\\model.mu"
-    partdir['Mark1Cockpit']             = "\\GameData\\Squad\\Parts\\Command\\mk1Cockpit\\model.mu"
-    partdir['Mark2Cockpit']             = "\\GameData\\Squad\\Parts\\Command\\mk1InlineCockpit\\model.mu"
-    partdir['landerCabinSmall']         = "\\GameData\\Squad\\Parts\\Command\\mk1LanderCan\\model.mu"
-    partdir['Mark1-2Pod']               = "\\GameData\\Squad\\Parts\\Command\\Mk1-2Pod\\model.mu"
-    partdir['mk2Cockpit.Standard']      = "\\GameData\\Squad\\SPP\\Mk2CockpitStandard\\model.mu"
-    partdir['mk2DroneCore']             = "\\GameData\\Squad\\SPP\\Mk2DroneCore\\model.mu"
-    partdir['mk2Cockpit.Inline']        = "\\GameData\\Squad\\SPP\\Mk2Cockpit_Inline\\model.mu"
-    partdir['mk2LanderCabin']           = "\\GameData\\Squad\\Parts\\Command\\mk2LanderCan\\model.mu"
-    partdir['mk3Cockpit.Shuttle']       = "\\GameData\\Squad\\Parts\\Mk3\\Mk3Cockpit_Shuttle\\model.mu"
-    partdir['cupola']                   = "\\GameData\\Squad\\Parts\\Command\\cupola\\model.mu"
-    partdir['probeCoreHex']             = "\\GameData\\Squad\\Parts\\Command\\probeCoreHex\\model.mu"
-    partdir['probeCoreOcto']            = "\\GameData\\Squad\\Parts\\Command\\probeCoreOcto\\model.mu"
-    partdir['probeCoreOcto2']           = "\\GameData\\Squad\\Parts\\Command\\probeCoreOcto2\\model.mu"
-    partdir['probeCoreCube']            = "\\GameData\\Squad\\Parts\\Command\\probeCoreCube\\model.mu"
-    partdir['probeStackSmall']          = "\\GameData\\Squad\\Parts\\Command\\probeStackSmall\\model.mu"
-    partdir['probeStackLarge']          = "\\GameData\\Squad\\Parts\\Command\\probeStackLarge\\model.mu"
-    partdir['probeCoreSphere']          = "\\GameData\\Squad\\Parts\\Command\\probeStackSphere\\model.mu"
+    partdir['mk1pod']                   = ["\\GameData\\Squad\\Parts\\Command\\mk1pod\\model.mu","pod"]
+    partdir['seatExternalCmd']          = ["\\GameData\\Squad\\Parts\\Command\\externalCommandSeat\\model.mu","pod"]
+    partdir['Mark1Cockpit']             = ["\\GameData\\Squad\\Parts\\Command\\mk1Cockpit\\model.mu","pod"]
+    partdir['Mark2Cockpit']             = ["\\GameData\\Squad\\Parts\\Command\\mk1InlineCockpit\\model.mu","pod"]
+    partdir['landerCabinSmall']         = ["\\GameData\\Squad\\Parts\\Command\\mk1LanderCan\\model.mu","pod"]
+    partdir['Mark1-2Pod']               = ["\\GameData\\Squad\\Parts\\Command\\Mk1-2Pod\\model.mu","pod"]
+    partdir['mk2Cockpit.Standard']      = ["\\GameData\\Squad\\SPP\\Mk2CockpitStandard\\model.mu","pod"]
+    partdir['mk2DroneCore']             = ["\\GameData\\Squad\\SPP\\Mk2DroneCore\\model.mu","pod"]
+    partdir['mk2Cockpit.Inline']        = ["\\GameData\\Squad\\SPP\\Mk2Cockpit_Inline\\model.mu","pod"]
+    partdir['mk2LanderCabin']           = ["\\GameData\\Squad\\Parts\\Command\\mk2LanderCan\\model.mu","pod"]
+    partdir['mk3Cockpit.Shuttle']       = ["\\GameData\\Squad\\Parts\\Mk3\\Mk3Cockpit_Shuttle\\model.mu","pod"]
+    partdir['cupola']                   = ["\\GameData\\Squad\\Parts\\Command\\cupola\\model.mu","pod"]
+    partdir['probeCoreHex']             = ["\\GameData\\Squad\\Parts\\Command\\probeCoreHex\\model.mu","pod"]
+    partdir['probeCoreOcto']            = ["\\GameData\\Squad\\Parts\\Command\\probeCoreOcto\\model.mu","pod"]
+    partdir['probeCoreOcto2']           = ["\\GameData\\Squad\\Parts\\Command\\probeCoreOcto2\\model.mu","pod"]
+    partdir['probeCoreCube']            = ["\\GameData\\Squad\\Parts\\Command\\probeCoreCube\\model.mu","pod"]
+    partdir['probeStackSmall']          = ["\\GameData\\Squad\\Parts\\Command\\probeStackSmall\\model.mu","pod"]
+    partdir['probeStackLarge']          = ["\\GameData\\Squad\\Parts\\Command\\probeStackLarge\\model.mu","pod"]
+    partdir['probeCoreSphere']          = ["\\GameData\\Squad\\Parts\\Command\\probeStackSphere\\model.mu","pod"]
     
     # Fuel Tanks
-    partdir['adapterSize2-Mk2']         = "\\GameData\\Squad\\Parts\\FuelTank\\adapterTanks\\Size2-Mk2.mu"
-    partdir['adapterSize2-Size1']       = "\\GameData\\Squad\\Parts\\FuelTank\\adapterTanks\\Size2-Size1.mu"
-    partdir['adapterSize2-Size1Slant']  = "\\GameData\\Squad\\Parts\\FuelTank\\adapterTanks\\Size2-Size1Slant.mu"
-    partdir['RCSTank1-2']               = "\\GameData\\Squad\\Parts\\FuelTank\\RCSFuelTankR1\\model.mu"
-    partdir['rcsTankMini']              = "\\GameData\\Squad\\Parts\\FuelTank\\RCSFuelTankR10\\model.mu"
-    partdir['RCSFuelTank']              = "\\GameData\\Squad\\Parts\\FuelTank\\RCSFuelTankR25\\model.mu"
-    partdir['fuelTankSmallFlat']        = "\\GameData\\Squad\\Parts\\FuelTank\\fuelTankT100\\model.mu"
-    partdir['fuelTankSmall']            = "\\GameData\\Squad\\Parts\\FuelTank\\fuelTankT200\\model.mu"
-    partdir['fuelTank']                 = "\\GameData\\Squad\\Parts\\FuelTank\\fuelTankT400\\model.mu"
-    partdir['fuelTank.long']            = "\\GameData\\Squad\\Parts\\FuelTank\\fuelTankT800\\model.mu"
-    partdir['fuelLine']                 = "\\GameData\\Squad\\Parts\\CompoundParts\\fuelLine\\model.mu"
-    partdir['Size3LargeTank']           = "\\GameData\\NASAmission\\Parts\\Size3LargeTank\\Size3LargeTank.mu"
-    partdir['Size3SmallTank']           = "\\GameData\\NASAmission\\Parts\\Size3SmallTank\\Size3SmallTank.mu"
-    partdir['Size3MediumTank']          = "\\GameData\\NASAmission\\Parts\\Size3MediumTank\\Size3MediumTank.mu"
-    partdir['MK1Fuselage']              = "\\GameData\\Squad\\Parts\\Mk1\\mk1fuselage.mu"
-    partdir['mk2.1m.Bicoupler']         = "\\GameData\\Squad\\SPP\\Mk2Adapters\\bicoupler.mu"
-    partdir['mk2Fuselage']              = "\\GameData\\Squad\\SPP\\Mk2FuselageLong\\FuselageLongLiquid.mu"
-    partdir['mk2FuselageShortLiquid']   = "\\GameData\\Squad\\SPP\\Mk2FuselageShort\\FuselageShortLiquid.mu"
-    partdir['mk2FuselageShortMono']     = "\\GameData\\Squad\\SPP\\Mk2FuselageShort\\FuselageShortMono.mu"
-    partdir['mk2FuselageLongLFO']       = "\\GameData\\Squad\\SPP\\Mk2FuselageLong\\FuselageLongLFO.mu"
-    partdir['mk2FuselageShortLFO']      = "\\GameData\\Squad\\SPP\\Mk2FuselageShort\\FuselageShortLFO.mu"
-    partdir['mk2SpacePlaneAdapter']     = "\\GameData\\Squad\\SPP\\Mk2Adapters\\standard.mu"
-    partdir['mk2.1m.AdapterLong']       = "\\GameData\\Squad\\SPP\\Mk2Adapters\\long.mu"
-    partdir['mk3FuselageLF.50']         = "\\GameData\\Squad\\Parts\\Mk3\\Mk3Fuselage\\LF_50.mu"
-    partdir['mk3FuselageLF.100']        = "\\GameData\\Squad\\Parts\\Mk3\\Mk3Fuselage\\LF_100.mu"
-    partdir['mk3FuselageLF.25']         = "\\GameData\\Squad\\Parts\\Mk3\\Mk3Fuselage\\LF_25.mu"
-    partdir['mk3FuselageMONO']          = "\\GameData\\Squad\\Parts\\Mk3\\Mk3Fuselage\\MONO.mu"
-    partdir['mk3FuselageLFO.50']        = "\\GameData\\Squad\\Parts\\Mk3\\Mk3Fuselage\\LFO_50.mu"
-    partdir['mk3FuselageLFO.100']       = "\\GameData\\Squad\\Parts\\Mk3\\Mk3Fuselage\\LFO_100.mu"
-    partdir['mk3FuselageLFO.25']        = "\\GameData\\Squad\\Parts\\Mk3\\Mk3Fuselage\\LFO_25.mu"
-    partdir['adapterMk3-Size2']         = "\\GameData\\Squad\\Parts\\FuelTank\\adapterTanks\\Mk3-Size2.mu"
-    partdir['adapterMk3-Size2Slant']    = "\\GameData\\Squad\\Parts\\FuelTank\\adapterTanks\\Mk3-Size2Slant.mu"
-    partdir['adapterSize3-Mk3']         = "\\GameData\\Squad\\Parts\\FuelTank\\adapterTanks\\Size3-Mk3.mu"
-    partdir['adapterMk3-Mk2']           = "\\GameData\\Squad\\Parts\\FuelTank\\adapterTanks\\Mk3-Mk2.mu"
-    partdir['miniFuelTank']             = "\\GameData\\Squad\\Parts\\FuelTank\\fuelTankOscarB\\model.mu"
-    partdir['xenonTank']                = "\\GameData\\Squad\\Parts\\FuelTank\\xenonTank\\model.mu"
-    partdir['xenonTankRadial']          = "\\GameData\\Squad\\Parts\\FuelTank\\xenonTankRadial\\model.mu"
-    partdir['fuelTank3-2']              = "\\GameData\\Squad\\Parts\\FuelTank\\fuelTankJumbo-64\\model.mu"
-    partdir['fuelTank2-2']              = "\\GameData\\Squad\\Parts\\FuelTank\\fuelTankX200-16\\model.mu"
-    partdir['fuelTank1-2']              = "\\GameData\\Squad\\Parts\\FuelTank\\fuelTankX200-32\\model.mu"
-    partdir['fuelTank4-2']              = "\\GameData\\Squad\\Parts\\FuelTank\\fuelTankX200-8\\model.mu"
-    partdir['toroidalFuelTank']         = "\\GameData\\Squad\\Parts\\FuelTank\\fuelTankToroidal\\model.mu"
-    partdir['rcsTankRadialLong']        = "\\GameData\\Squad\\Parts\\FuelTank\\RCStankRadialLong\\model.mu"
-    partdir['radialRCSTank']            = "\\GameData\\Squad\\Parts\\FuelTank\\RCSTankRadial\\model.mu"
+    partdir['adapterSize2-Mk2']         = ["\\GameData\\Squad\\Parts\\FuelTank\\adapterTanks\\Size2-Mk2.mu","fuel"]
+    partdir['adapterSize2-Size1']       = ["\\GameData\\Squad\\Parts\\FuelTank\\adapterTanks\\Size2-Size1.mu","fuel"]
+    partdir['adapterSize2-Size1Slant']  = ["\\GameData\\Squad\\Parts\\FuelTank\\adapterTanks\\Size2-Size1Slant.mu","fuel"]
+    partdir['RCSTank1-2']               = ["\\GameData\\Squad\\Parts\\FuelTank\\RCSFuelTankR1\\model.mu","fuel"]
+    partdir['rcsTankMini']              = ["\\GameData\\Squad\\Parts\\FuelTank\\RCSFuelTankR10\\model.mu","fuel"]
+    partdir['RCSFuelTank']              = ["\\GameData\\Squad\\Parts\\FuelTank\\RCSFuelTankR25\\model.mu","fuel"]
+    partdir['fuelTankSmallFlat']        = ["\\GameData\\Squad\\Parts\\FuelTank\\fuelTankT100\\model.mu","fuel"]
+    partdir['fuelTankSmall']            = ["\\GameData\\Squad\\Parts\\FuelTank\\fuelTankT200\\model.mu","fuel"]
+    partdir['fuelTank']                 = ["\\GameData\\Squad\\Parts\\FuelTank\\fuelTankT400\\model.mu","fuel"]
+    partdir['fuelTank.long']            = ["\\GameData\\Squad\\Parts\\FuelTank\\fuelTankT800\\model.mu","fuel"]
+    partdir['fuelLine']                 = ["\\GameData\\Squad\\Parts\\CompoundParts\\fuelLine\\model.mu","fuel"]
+    partdir['Size3LargeTank']           = ["\\GameData\\NASAmission\\Parts\\Size3LargeTank\\Size3LargeTank.mu","fuel"]
+    partdir['Size3SmallTank']           = ["\\GameData\\NASAmission\\Parts\\Size3SmallTank\\Size3SmallTank.mu","fuel"]
+    partdir['Size3MediumTank']          = ["\\GameData\\NASAmission\\Parts\\Size3MediumTank\\Size3MediumTank.mu","fuel"]
+    partdir['MK1Fuselage']              = ["\\GameData\\Squad\\Parts\\Mk1\\mk1fuselage.mu","fuel"]
+    partdir['mk2.1m.Bicoupler']         = ["\\GameData\\Squad\\SPP\\Mk2Adapters\\bicoupler.mu","fuel"]
+    partdir['mk2Fuselage']              = ["\\GameData\\Squad\\SPP\\Mk2FuselageLong\\FuselageLongLiquid.mu","fuel"]
+    partdir['mk2FuselageShortLiquid']   = ["\\GameData\\Squad\\SPP\\Mk2FuselageShort\\FuselageShortLiquid.mu","fuel"]
+    partdir['mk2FuselageShortMono']     = ["\\GameData\\Squad\\SPP\\Mk2FuselageShort\\FuselageShortMono.mu","fuel"]
+    partdir['mk2FuselageLongLFO']       = ["\\GameData\\Squad\\SPP\\Mk2FuselageLong\\FuselageLongLFO.mu","fuel"]
+    partdir['mk2FuselageShortLFO']      = ["\\GameData\\Squad\\SPP\\Mk2FuselageShort\\FuselageShortLFO.mu","fuel"]
+    partdir['mk2SpacePlaneAdapter']     = ["\\GameData\\Squad\\SPP\\Mk2Adapters\\standard.mu","fuel"]
+    partdir['mk2.1m.AdapterLong']       = ["\\GameData\\Squad\\SPP\\Mk2Adapters\\long.mu","fuel"]
+    partdir['mk3FuselageLF.50']         = ["\\GameData\\Squad\\Parts\\Mk3\\Mk3Fuselage\\LF_50.mu","fuel"]
+    partdir['mk3FuselageLF.100']        = ["\\GameData\\Squad\\Parts\\Mk3\\Mk3Fuselage\\LF_100.mu","fuel"]
+    partdir['mk3FuselageLF.25']         = ["\\GameData\\Squad\\Parts\\Mk3\\Mk3Fuselage\\LF_25.mu","fuel"]
+    partdir['mk3FuselageMONO']          = ["\\GameData\\Squad\\Parts\\Mk3\\Mk3Fuselage\\MONO.mu","fuel"]
+    partdir['mk3FuselageLFO.50']        = ["\\GameData\\Squad\\Parts\\Mk3\\Mk3Fuselage\\LFO_50.mu","fuel"]
+    partdir['mk3FuselageLFO.100']       = ["\\GameData\\Squad\\Parts\\Mk3\\Mk3Fuselage\\LFO_100.mu","fuel"]
+    partdir['mk3FuselageLFO.25']        = ["\\GameData\\Squad\\Parts\\Mk3\\Mk3Fuselage\\LFO_25.mu","fuel"]
+    partdir['adapterMk3-Size2']         = ["\\GameData\\Squad\\Parts\\FuelTank\\adapterTanks\\Mk3-Size2.mu","fuel"]
+    partdir['adapterMk3-Size2Slant']    = ["\\GameData\\Squad\\Parts\\FuelTank\\adapterTanks\\Mk3-Size2Slant.mu","fuel"]
+    partdir['adapterSize3-Mk3']         = ["\\GameData\\Squad\\Parts\\FuelTank\\adapterTanks\\Size3-Mk3.mu","fuel"]
+    partdir['adapterMk3-Mk2']           = ["\\GameData\\Squad\\Parts\\FuelTank\\adapterTanks\\Mk3-Mk2.mu","fuel"]
+    partdir['miniFuelTank']             = ["\\GameData\\Squad\\Parts\\FuelTank\\fuelTankOscarB\\model.mu","fuel"]
+    partdir['xenonTank']                = ["\\GameData\\Squad\\Parts\\FuelTank\\xenonTank\\model.mu","fuel"]
+    partdir['xenonTankRadial']          = ["\\GameData\\Squad\\Parts\\FuelTank\\xenonTankRadial\\model.mu","fuel"]
+    partdir['fuelTank3-2']              = ["\\GameData\\Squad\\Parts\\FuelTank\\fuelTankJumbo-64\\model.mu","fuel"]
+    partdir['fuelTank2-2']              = ["\\GameData\\Squad\\Parts\\FuelTank\\fuelTankX200-16\\model.mu","fuel"]
+    partdir['fuelTank1-2']              = ["\\GameData\\Squad\\Parts\\FuelTank\\fuelTankX200-32\\model.mu","fuel"]
+    partdir['fuelTank4-2']              = ["\\GameData\\Squad\\Parts\\FuelTank\\fuelTankX200-8\\model.mu","fuel"]
+    partdir['toroidalFuelTank']         = ["\\GameData\\Squad\\Parts\\FuelTank\\fuelTankToroidal\\model.mu","fuel"]
+    partdir['rcsTankRadialLong']        = ["\\GameData\\Squad\\Parts\\FuelTank\\RCStankRadialLong\\model.mu","fuel"]
+    partdir['radialRCSTank']            = ["\\GameData\\Squad\\Parts\\FuelTank\\RCSTankRadial\\model.mu","fuel"]
     
     # Engines
-    partdir['JetEngine']                = "\\GameData\\Squad\\Parts\\Engine\\jetEngineBasic\\model.mu"
-    partdir['Size3AdvancedEngine']      = "\\GameData\\NASAmission\\Parts\\Size3AdvancedEngine\\Size3AdvancedEngine.mu"
-    partdir['Size2LFB']                 = "\\GameData\\NASAmission\\Parts\\Size2LFB\\Size2LFB.mu"
-    partdir['microEngine']              = "\\GameData\\Squad\\Parts\\Engine\\liquidEngineLV-1\\model.mu"
-    partdir['radialEngineMini']         = "\\GameData\\Squad\\Parts\\Engine\\liquidEngineLV-1R\\model.mu"
-    partdir['liquidEngine3']            = "\\GameData\\Squad\\Parts\\Engine\\liquidEngineLV-909\\model.mu"
-    partdir['nuclearEngine']            = "\\GameData\\Squad\\Parts\\Engine\\liquidEngineLV-N\\model.mu"
-    partdir['liquidEngine']             = "\\GameData\\Squad\\Parts\\Engine\\liquidEngineLV-T30\\model.mu"
-    partdir['liquidEngine2']            = "\\GameData\\Squad\\Parts\\Engine\\liquidEngineLV-T45\\model.mu"
-    partdir['omsEngine']                = "\\GameData\\Squad\\Parts\\Engine\\OMSEngine\\NewModel.mu"
-    partdir['ionEngine']                = "\\GameData\\Squad\\Parts\\Engine\\ionEngine\\model.mu"
-    partdir['RAPIER']                   = "\\GameData\\Squad\\Parts\\Engine\\rapierEngine\\rapier.mu"
-    partdir['liquidEngine1-2']          = "\\GameData\\Squad\\Parts\\Engine\\liquidEngineMainsail\\model.mu"
-    partdir['liquidEngine2-2']          = "\\GameData\\Squad\\Parts\\Engine\\liquidEnginePoodle\\model.mu"
-    partdir['engineLargeSkipper']       = "\\GameData\\Squad\\Parts\\Engine\\liquidEngineSkipper\\model.mu"
-    partdir['smallRadialEngine']        = "\\GameData\\Squad\\Parts\\Engine\\liquidEngine24-77\\model.mu"
-    partdir['liquidEngineMini']         = "\\GameData\\Squad\\Parts\\Engine\\liquidEngine48-7S\\model.mu"
-    partdir['solidBooster1-1']          = "\\GameData\\Squad\\Parts\\Engine\\solidBoosterBACC\\model.mu"
-    partdir['radialLiquidEngine1-2']    = "\\GameData\\Squad\\Parts\\Engine\\liquidEngineMk55\\model.mu"
-    partdir['solidBooster']             = "\\GameData\\Squad\\Parts\\Engine\\solidBoosterRT-10\\model.mu"
-    partdir['MassiveBooster']           = "\\GameData\\NASAmission\\Parts\\MassiveSRB\\MassiveSRB.mu"
-    partdir['Size3EngineCluster']       = "\\GameData\\NASAmission\\Parts\\Size3EngineCluster\\Size3EngineCluster.mu"
-    partdir['sepMotor1']                = "\\GameData\\Squad\\Parts\\Engine\\solidBoosterSep\\model.mu"
-    partdir['toroidalAerospike']        = "\\GameData\\Squad\\Parts\\Engine\\liquidEngineAerospike\\model.mu"
-    partdir['turboFanEngine']           = "\\GameData\\Squad\\Parts\\Engine\\jetEngineTurbo\\model.mu"
+    partdir['JetEngine']                = ["\\GameData\\Squad\\Parts\\Engine\\jetEngineBasic\\model.mu","engine"]
+    partdir['Size3AdvancedEngine']      = ["\\GameData\\NASAmission\\Parts\\Size3AdvancedEngine\\Size3AdvancedEngine.mu","engine"]
+    partdir['Size2LFB']                 = ["\\GameData\\NASAmission\\Parts\\Size2LFB\\Size2LFB.mu","engine"]
+    partdir['microEngine']              = ["\\GameData\\Squad\\Parts\\Engine\\liquidEngineLV-1\\model.mu","engine"]
+    partdir['radialEngineMini']         = ["\\GameData\\Squad\\Parts\\Engine\\liquidEngineLV-1R\\model.mu","engine"]
+    partdir['liquidEngine3']            = ["\\GameData\\Squad\\Parts\\Engine\\liquidEngineLV-909\\model.mu","engine"]
+    partdir['nuclearEngine']            = ["\\GameData\\Squad\\Parts\\Engine\\liquidEngineLV-N\\model.mu","engine"]
+    partdir['liquidEngine']             = ["\\GameData\\Squad\\Parts\\Engine\\liquidEngineLV-T30\\model.mu","engine"]
+    partdir['liquidEngine2']            = ["\\GameData\\Squad\\Parts\\Engine\\liquidEngineLV-T45\\model.mu","engine"]
+    partdir['omsEngine']                = ["\\GameData\\Squad\\Parts\\Engine\\OMSEngine\\NewModel.mu","engine"]
+    partdir['ionEngine']                = ["\\GameData\\Squad\\Parts\\Engine\\ionEngine\\model.mu","engine"]
+    partdir['RAPIER']                   = ["\\GameData\\Squad\\Parts\\Engine\\rapierEngine\\rapier.mu","engine"]
+    partdir['liquidEngine1-2']          = ["\\GameData\\Squad\\Parts\\Engine\\liquidEngineMainsail\\model.mu","engine"]
+    partdir['liquidEngine2-2']          = ["\\GameData\\Squad\\Parts\\Engine\\liquidEnginePoodle\\model.mu","engine"]
+    partdir['engineLargeSkipper']       = ["\\GameData\\Squad\\Parts\\Engine\\liquidEngineSkipper\\model.mu","engine"]
+    partdir['smallRadialEngine']        = ["\\GameData\\Squad\\Parts\\Engine\\liquidEngine24-77\\model.mu","engine"]
+    partdir['liquidEngineMini']         = ["\\GameData\\Squad\\Parts\\Engine\\liquidEngine48-7S\\model.mu","engine"]
+    partdir['solidBooster1-1']          = ["\\GameData\\Squad\\Parts\\Engine\\solidBoosterBACC\\model.mu","engine"]
+    partdir['radialLiquidEngine1-2']    = ["\\GameData\\Squad\\Parts\\Engine\\liquidEngineMk55\\model.mu","engine"]
+    partdir['solidBooster']             = ["\\GameData\\Squad\\Parts\\Engine\\solidBoosterRT-10\\model.mu","engine"]
+    partdir['MassiveBooster']           = ["\\GameData\\NASAmission\\Parts\\MassiveSRB\\MassiveSRB.mu","engine"]
+    partdir['Size3EngineCluster']       = ["\\GameData\\NASAmission\\Parts\\Size3EngineCluster\\Size3EngineCluster.mu","engine"]
+    partdir['sepMotor1']                = ["\\GameData\\Squad\\Parts\\Engine\\solidBoosterSep\\model.mu","engine"]
+    partdir['toroidalAerospike']        = ["\\GameData\\Squad\\Parts\\Engine\\liquidEngineAerospike\\model.mu","engine"]
+    partdir['turboFanEngine']           = ["\\GameData\\Squad\\Parts\\Engine\\jetEngineTurbo\\model.mu","engine"]
     
     # Command and Control
-    partdir['advSasModule']             = "\\GameData\\Squad\\Parts\\Command\\inlineAdvancedStabilizer\\model.mu"
-    partdir['asasmodule1-2']            = "\\GameData\\Squad\\Parts\\Command\\advancedSasModuleLarge\\model.mu"
-    partdir['linearRcs']                = "\\GameData\\Squad\\Parts\\Utility\\linearRCS\\model.mu"
-    partdir['RCSBlock']                 = "\\GameData\\Squad\\Parts\\Utility\\rcsBlockRV-105\\model.mu"
-    partdir['sasModule']                = "\\GameData\\Squad\\Parts\\Command\\inlineReactionWheel\\model.mu"
-    partdir['vernierEngine']            = "\\GameData\\Squad\\Parts\\Engine\\vernorEngine\\NewModel.mu"
+    partdir['advSasModule']             = ["\\GameData\\Squad\\Parts\\Command\\inlineAdvancedStabilizer\\model.mu","control"]
+    partdir['asasmodule1-2']            = ["\\GameData\\Squad\\Parts\\Command\\advancedSasModuleLarge\\model.mu","control"]
+    partdir['linearRcs']                = ["\\GameData\\Squad\\Parts\\Utility\\linearRCS\\model.mu","control"]
+    partdir['RCSBlock']                 = ["\\GameData\\Squad\\Parts\\Utility\\rcsBlockRV-105\\model.mu","control"]
+    partdir['sasModule']                = ["\\GameData\\Squad\\Parts\\Command\\inlineReactionWheel\\model.mu","control"]
+    partdir['vernierEngine']            = ["\\GameData\\Squad\\Parts\\Engine\\vernorEngine\\NewModel.mu","control"]
     
     # Structural
-    partdir['stackPoint1']              = "\\GameData\\Squad\\Parts\\Utility\\radialAttachmentPoint\\model.mu"
-    partdir['strutCube']                = "\\GameData\\Squad\\Parts\\Structural\\strutCubicOcto\\model.mu"
-    partdir['strutConnector']           = "\\GameData\\Squad\\Parts\\CompoundParts\\strutConnector\\model.mu"
-    partdir['adapterSmallMiniTall']     = "\\GameData\\Squad\\Parts\\Structural\\adapterSmallMiniTall\\model.mu"
-    partdir['adapterSmallMiniShort']    = "\\GameData\\Squad\\Parts\\Structural\\adapterSmallMiniShort\\model.mu"
-    partdir['radialDecoupler1-2']       = "\\GameData\\Squad\\Parts\\Utility\\decouplerRadialHDM\\model.mu"
-    partdir['Size3to2Adapter']          = "\\GameData\\NASAmission\\Parts\\Size3To2Adapter\\Size3Adapter.mu"
-    partdir['structuralPanel1']         = "\\GameData\\Squad\\Parts\\Structural\\structuralPanel1x1\\model.mu"
-    partdir['structuralPanel2']         = "\\GameData\\Squad\\Parts\\Structural\\structuralPanel2x2\\model.mu"
-    partdir['structuralIBeam2']         = "\\GameData\\Squad\\Parts\\Structural\\structuralIBeam200\\model.mu"
-    partdir['structuralIBeam3']         = "\\GameData\\Squad\\Parts\\Structural\\structuralIBeam200Pocket\\model.mu"
-    partdir['structuralIBeam1']         = "\\GameData\\Squad\\Parts\\Structural\\structuralIBeam650\\model.mu"
-    partdir['trussAdapter']             = "\\GameData\\Squad\\Parts\\Structural\\trussGirderAdapter\\model.mu"
-    partdir['trussPiece1x']             = "\\GameData\\Squad\\Parts\\Structural\\trussGirderL\\model.mu"
-    partdir['trussPiece3x']             = "\\GameData\\Squad\\Parts\\Structural\\trussGirderXL\\model.mu"
-    partdir['noseConeAdapter']          = "\\GameData\\Squad\\Parts\\Aero\\noseConeAdapter\\model.mu"
-    partdir['strutOcto']                = "\\GameData\\Squad\\Parts\\Structural\\strutOcto\\model.mu"
-    partdir['roverBody']                = "\\GameData\\Squad\\Parts\\Utility\\roverBody\\model.mu"
-    partdir['largeAdapter']             = "\\GameData\\Squad\\Parts\\Utility\\largeAdapter\\model.mu"
-    partdir['largeAdapter2']            = "\\GameData\\Squad\\Parts\\Utility\\largeAdapterShort\\model.mu"
-    partdir['decoupler1-2']             = "\\GameData\\Squad\\Parts\\Utility\\decouplerStack2m\\model.mu"
-    partdir['stationHub']               = "\\GameData\\Squad\\Parts\\Structural\\stationHub\\model.mu"
-    partdir['smallHardpoint']           = "\\GameData\\Squad\\Parts\\Structural\\smallHardpoint\\model.mu"
-    partdir['Mk1FuselageStructural']    = "\\GameData\\Squad\\Parts\\Mk1\\mk1structural.mu"
-    partdir['structuralPylon']          = "\\GameData\\Squad\\Parts\\Structural\\structuralPylon\\model.mu"
-    partdir['structuralMiniNode']       = "\\GameData\\Squad\\Parts\\Structural\\structuralMicronode\\model.mu"
-    partdir['stackDecoupler']           = "\\GameData\\Squad\\Parts\\Utility\\decouplerStackTR-18A\\model.mu"
-    partdir['stackSeparator']           = "\\GameData\\Squad\\Parts\\Utility\\decouplerSeparatorTR-18D\\model.mu"
-    partdir['stackSeparatorMini']       = "\\GameData\\Squad\\Parts\\Utility\\decouplerSeparatorTR-2C\\model.mu"
-    partdir['stackDecouplerMini']       = "\\GameData\\Squad\\Parts\\Utility\\decouplerStackTR-2V\\model.mu"
-    partdir['size3Decoupler']           = "\\GameData\\NASAmission\\Parts\\Size3Decoupler\\Size3Decoupler.mu"
-    partdir['stackSeparatorBig']        = "\\GameData\\Squad\\Parts\\Utility\\decouplerSeparatorTR-XL\\model.mu"
-    partdir['launchClamp1']             = "\\GameData\\Squad\\Parts\\Utility\\launchClamp1\\model.mu"
-    partdir['radialDecoupler']          = "\\GameData\\Squad\\Parts\\Utility\\decouplerRadialTT-38K\\model.mu"
-    partdir['radialDecoupler2']         = "\\GameData\\Squad\\Parts\\Utility\\decouplerRadialTT-70\\model.mu"
-    partdir['stackTriCoupler']          = "\\GameData\\Squad\\Parts\\Utility\\stackTriCoupler\\model.mu"
-    partdir['stackBiCoupler']           = "\\GameData\\Squad\\Parts\\Utility\\stackBiCoupler\\model.mu"
-    partdir['adapterLargeSmallBi']      = "\\GameData\\Squad\\Parts\\Structural\\adapterLargeSmallBi\\model.mu"
-    partdir['stackQuadCoupler']         = "\\GameData\\Squad\\Parts\\Utility\\stackQuadCoupler\\model.mu"
-    partdir['adapterLargeSmallTri']     = "\\GameData\\Squad\\Parts\\Structural\\adapterLargeSmallTri\\model.mu"
-    partdir['adapterLargeSmallQuad']    = "\\GameData\\Squad\\Parts\\Structural\\adapterLargeSmallQuad\\model.mu"
+    partdir['stackPoint1']              = ["\\GameData\\Squad\\Parts\\Utility\\radialAttachmentPoint\\model.mu","structural"]
+    partdir['strutCube']                = ["\\GameData\\Squad\\Parts\\Structural\\strutCubicOcto\\model.mu","structural"]
+    partdir['strutConnector']           = ["\\GameData\\Squad\\Parts\\CompoundParts\\strutConnector\\model.mu","structural"]
+    partdir['adapterSmallMiniTall']     = ["\\GameData\\Squad\\Parts\\Structural\\adapterSmallMiniTall\\model.mu","structural"]
+    partdir['adapterSmallMiniShort']    = ["\\GameData\\Squad\\Parts\\Structural\\adapterSmallMiniShort\\model.mu","structural"]
+    partdir['radialDecoupler1-2']       = ["\\GameData\\Squad\\Parts\\Utility\\decouplerRadialHDM\\model.mu","structural"]
+    partdir['Size3to2Adapter']          = ["\\GameData\\NASAmission\\Parts\\Size3To2Adapter\\Size3Adapter.mu","structural"]
+    partdir['structuralPanel1']         = ["\\GameData\\Squad\\Parts\\Structural\\structuralPanel1x1\\model.mu","structural"]
+    partdir['structuralPanel2']         = ["\\GameData\\Squad\\Parts\\Structural\\structuralPanel2x2\\model.mu","structural"]
+    partdir['structuralIBeam2']         = ["\\GameData\\Squad\\Parts\\Structural\\structuralIBeam200\\model.mu","structural"]
+    partdir['structuralIBeam3']         = ["\\GameData\\Squad\\Parts\\Structural\\structuralIBeam200Pocket\\model.mu","structural"]
+    partdir['structuralIBeam1']         = ["\\GameData\\Squad\\Parts\\Structural\\structuralIBeam650\\model.mu","structural"]
+    partdir['trussAdapter']             = ["\\GameData\\Squad\\Parts\\Structural\\trussGirderAdapter\\model.mu","structural"]
+    partdir['trussPiece1x']             = ["\\GameData\\Squad\\Parts\\Structural\\trussGirderL\\model.mu","structural"]
+    partdir['trussPiece3x']             = ["\\GameData\\Squad\\Parts\\Structural\\trussGirderXL\\model.mu","structural"]
+    partdir['noseConeAdapter']          = ["\\GameData\\Squad\\Parts\\Aero\\noseConeAdapter\\model.mu","structural"]
+    partdir['strutOcto']                = ["\\GameData\\Squad\\Parts\\Structural\\strutOcto\\model.mu","structural"]
+    partdir['roverBody']                = ["\\GameData\\Squad\\Parts\\Utility\\roverBody\\model.mu","structural"]
+    partdir['largeAdapter']             = ["\\GameData\\Squad\\Parts\\Utility\\largeAdapter\\model.mu","structural"]
+    partdir['largeAdapter2']            = ["\\GameData\\Squad\\Parts\\Utility\\largeAdapterShort\\model.mu","structural"]
+    partdir['decoupler1-2']             = ["\\GameData\\Squad\\Parts\\Utility\\decouplerStack2m\\model.mu","structural"]
+    partdir['stationHub']               = ["\\GameData\\Squad\\Parts\\Structural\\stationHub\\model.mu","structural"]
+    partdir['smallHardpoint']           = ["\\GameData\\Squad\\Parts\\Structural\\smallHardpoint\\model.mu","structural"]
+    partdir['Mk1FuselageStructural']    = ["\\GameData\\Squad\\Parts\\Mk1\\mk1structural.mu","structural"]
+    partdir['structuralPylon']          = ["\\GameData\\Squad\\Parts\\Structural\\structuralPylon\\model.mu","structural"]
+    partdir['structuralMiniNode']       = ["\\GameData\\Squad\\Parts\\Structural\\structuralMicronode\\model.mu","structural"]
+    partdir['stackDecoupler']           = ["\\GameData\\Squad\\Parts\\Utility\\decouplerStackTR-18A\\model.mu","structural"]
+    partdir['stackSeparator']           = ["\\GameData\\Squad\\Parts\\Utility\\decouplerSeparatorTR-18D\\model.mu","structural"]
+    partdir['stackSeparatorMini']       = ["\\GameData\\Squad\\Parts\\Utility\\decouplerSeparatorTR-2C\\model.mu","structural"]
+    partdir['stackDecouplerMini']       = ["\\GameData\\Squad\\Parts\\Utility\\decouplerStackTR-2V\\model.mu","structural"]
+    partdir['size3Decoupler']           = ["\\GameData\\NASAmission\\Parts\\Size3Decoupler\\Size3Decoupler.mu","structural"]
+    partdir['stackSeparatorBig']        = ["\\GameData\\Squad\\Parts\\Utility\\decouplerSeparatorTR-XL\\model.mu","structural"]
+    partdir['launchClamp1']             = ["\\GameData\\Squad\\Parts\\Utility\\launchClamp1\\model.mu","structural"]
+    partdir['radialDecoupler']          = ["\\GameData\\Squad\\Parts\\Utility\\decouplerRadialTT-38K\\model.mu","structural"]
+    partdir['radialDecoupler2']         = ["\\GameData\\Squad\\Parts\\Utility\\decouplerRadialTT-70\\model.mu","structural"]
+    partdir['stackTriCoupler']          = ["\\GameData\\Squad\\Parts\\Utility\\stackTriCoupler\\model.mu","structural"]
+    partdir['stackBiCoupler']           = ["\\GameData\\Squad\\Parts\\Utility\\stackBiCoupler\\model.mu","structural"]
+    partdir['adapterLargeSmallBi']      = ["\\GameData\\Squad\\Parts\\Structural\\adapterLargeSmallBi\\model.mu","structural"]
+    partdir['stackQuadCoupler']         = ["\\GameData\\Squad\\Parts\\Utility\\stackQuadCoupler\\model.mu","structural"]
+    partdir['adapterLargeSmallTri']     = ["\\GameData\\Squad\\Parts\\Structural\\adapterLargeSmallTri\\model.mu","structural"]
+    partdir['adapterLargeSmallQuad']    = ["\\GameData\\Squad\\Parts\\Structural\\adapterLargeSmallQuad\\model.mu","structural"]
     
     # Aerodynamics
-    partdir['AdvancedCanard']           = "\\GameData\\Squad\\Parts\\Aero\\advancedCanard\\model.mu"
-    partdir['noseCone']                 = "\\GameData\\Squad\\Parts\\Aero\\aerodynamicNoseCone\\model.mu"
-    partdir['R8winglet']                = "\\GameData\\Squad\\Parts\\Aero\\wingletAV-R8\\model.mu"
-    partdir['winglet']                  = "\\GameData\\Squad\\Parts\\Aero\\wingletAV-T1\\model.mu"
-    partdir['CircularIntake']           = "\\GameData\\Squad\\Parts\\Utility\\CircularIntake\\model.mu"
-    partdir['deltaWing']                = "\\GameData\\Squad\\SPP\\Wings\\delta.mu"
-    partdir['winglet3']                 = "\\GameData\\Squad\\Parts\\Aero\\wingletDeltaDeluxe\\model.mu"
-    partdir['StandardCtrlSrf']          = "\\GameData\\Squad\\SPP\\Wings\\elevon1.mu"
-    partdir['elevon3']                  = "\\GameData\\Squad\\SPP\\Wings\\elevon3.mu"
-    partdir['smallCtrlSrf']             = "\\GameData\\Squad\\SPP\\Wings\\elevon4.mu"
-    partdir['elevon5']                  = "\\GameData\\Squad\\SPP\\Wings\\elevon5.mu"
-    partdir['elevon2']                  = "\\GameData\\Squad\\SPP\\Wings\\elevon2.mu"      
-    partdir['nacelleBody']              = "\\GameData\\Squad\\Parts\\Structural\\engineNacelle\\model.mu"
-    partdir['MK1IntakeFuselage']        = "\\GameData\\Squad\\Parts\\Mk1\\mk1fuselageIntake.mu"
-    partdir['rocketNoseCone']           = "\\GameData\\Squad\\Parts\\Aero\\protectiveRocketNoseMk7\\model.mu"
-    partdir['radialEngineBody']         = "\\GameData\\Squad\\Parts\\Structural\\engineBodyRadial\\model.mu"
-    partdir['ramAirIntake']             = "\\GameData\\Squad\\Parts\\Utility\\ramAirIntake\\model.mu"
-    partdir['shockConeIntake']          = "\\GameData\\Squad\\SPP\\ShockConeIntake\\model.mu"
-    partdir['delta.small']              = "\\GameData\\Squad\\SPP\\Wings\\delta_small.mu"
-    partdir['CanardController']         = "\\GameData\\Squad\\Parts\\Aero\\standardCanard\\model.mu"
-    partdir['standardNoseCone']         = "\\GameData\\Squad\\Parts\\Aero\\standardNoseCone\\model.mu"
-    partdir['IntakeRadialLong']         = "\\GameData\\Squad\\SPP\\IntakeRadialLong\\IntakeRadial.mu"
-    partdir['structuralWing']           = "\\GameData\\Squad\\SPP\\Wings\\structural1.mu"
-    partdir['structuralWing2']          = "\\GameData\\Squad\\SPP\\Wings\\structural2.mu"
-    partdir['structuralWing3']          = "\\GameData\\Squad\\SPP\\Wings\\structural3.mu"
-    partdir['structuralWing4']          = "\\GameData\\Squad\\SPP\\Wings\\structural4.mu"
-    partdir['sweptWing1']               = "\\GameData\\Squad\\SPP\\Wings\\swept1.mu"
-    partdir['sweptWing2']               = "\\GameData\\Squad\\SPP\\Wings\\swept2.mu"
-    partdir['sweptWing']                = "\\GameData\\Squad\\Parts\\Aero\\sweptWing\\model.mu"
-    partdir['airplaneTail']             = "\\GameData\\Squad\\Parts\\Aero\\tailConnector\\model.mu"
-    partdir['tailfin']                  = "\\GameData\\Squad\\Parts\\Aero\\tailfin\\model.mu"
-    partdir['wingConnector']            = "\\GameData\\Squad\\SPP\\Wings\\connector1.mu"
-    partdir['wingConnector2']           = "\\GameData\\Squad\\SPP\\Wings\\connector2.mu"
-    partdir['wingConnector3']           = "\\GameData\\Squad\\SPP\\Wings\\connector3.mu"
-    partdir['wingConnector4']           = "\\GameData\\Squad\\SPP\\Wings\\connector4.mu"
-    partdir['wingConnector5']           = "\\GameData\\Squad\\SPP\\Wings\\connector5.mu"
-    partdir['wingStrake']               = "\\GameData\\Squad\\SPP\\Wings\\strake.mu"
-    partdir['airScoop']                 = "\\GameData\\Squad\\Parts\\Utility\\airIntakeRadialXM-G50\\model.mu"
+    partdir['AdvancedCanard']           = ["\\GameData\\Squad\\Parts\\Aero\\advancedCanard\\model.mu","aero"]
+    partdir['noseCone']                 = ["\\GameData\\Squad\\Parts\\Aero\\aerodynamicNoseCone\\model.mu","aero"]
+    partdir['R8winglet']                = ["\\GameData\\Squad\\Parts\\Aero\\wingletAV-R8\\model.mu","aero"]
+    partdir['winglet']                  = ["\\GameData\\Squad\\Parts\\Aero\\wingletAV-T1\\model.mu","aero"]
+    partdir['CircularIntake']           = ["\\GameData\\Squad\\Parts\\Utility\\CircularIntake\\model.mu","aero"]
+    partdir['deltaWing']                = ["\\GameData\\Squad\\SPP\\Wings\\delta.mu","aero"]
+    partdir['winglet3']                 = ["\\GameData\\Squad\\Parts\\Aero\\wingletDeltaDeluxe\\model.mu","aero"]
+    partdir['StandardCtrlSrf']          = ["\\GameData\\Squad\\SPP\\Wings\\elevon1.mu","aero"]
+    partdir['elevon3']                  = ["\\GameData\\Squad\\SPP\\Wings\\elevon3.mu","aero"]
+    partdir['smallCtrlSrf']             = ["\\GameData\\Squad\\SPP\\Wings\\elevon4.mu","aero"]
+    partdir['elevon5']                  = ["\\GameData\\Squad\\SPP\\Wings\\elevon5.mu","aero"]
+    partdir['elevon2']                  = ["\\GameData\\Squad\\SPP\\Wings\\elevon2.mu","aero"]
+    partdir['nacelleBody']              = ["\\GameData\\Squad\\Parts\\Structural\\engineNacelle\\model.mu","aero"]
+    partdir['MK1IntakeFuselage']        = ["\\GameData\\Squad\\Parts\\Mk1\\mk1fuselageIntake.mu","aero"]
+    partdir['rocketNoseCone']           = ["\\GameData\\Squad\\Parts\\Aero\\protectiveRocketNoseMk7\\model.mu","aero"]
+    partdir['radialEngineBody']         = ["\\GameData\\Squad\\Parts\\Structural\\engineBodyRadial\\model.mu","aero"]
+    partdir['ramAirIntake']             = ["\\GameData\\Squad\\Parts\\Utility\\ramAirIntake\\model.mu","aero"]
+    partdir['shockConeIntake']          = ["\\GameData\\Squad\\SPP\\ShockConeIntake\\model.mu","aero"]
+    partdir['delta.small']              = ["\\GameData\\Squad\\SPP\\Wings\\delta_small.mu","aero"]
+    partdir['CanardController']         = ["\\GameData\\Squad\\Parts\\Aero\\standardCanard\\model.mu","aero"]
+    partdir['standardNoseCone']         = ["\\GameData\\Squad\\Parts\\Aero\\standardNoseCone\\model.mu","aero"]
+    partdir['IntakeRadialLong']         = ["\\GameData\\Squad\\SPP\\IntakeRadialLong\\IntakeRadial.mu","aero"]
+    partdir['structuralWing']           = ["\\GameData\\Squad\\SPP\\Wings\\structural1.mu","aero"]
+    partdir['structuralWing2']          = ["\\GameData\\Squad\\SPP\\Wings\\structural2.mu","aero"]
+    partdir['structuralWing3']          = ["\\GameData\\Squad\\SPP\\Wings\\structural3.mu","aero"]
+    partdir['structuralWing4']          = ["\\GameData\\Squad\\SPP\\Wings\\structural4.mu","aero"]
+    partdir['sweptWing1']               = ["\\GameData\\Squad\\SPP\\Wings\\swept1.mu","aero"]
+    partdir['sweptWing2']               = ["\\GameData\\Squad\\SPP\\Wings\\swept2.mu","aero"]
+    partdir['sweptWing']                = ["\\GameData\\Squad\\Parts\\Aero\\sweptWing\\model.mu","aero"]
+    partdir['airplaneTail']             = ["\\GameData\\Squad\\Parts\\Aero\\tailConnector\\model.mu","aero"]
+    partdir['tailfin']                  = ["\\GameData\\Squad\\Parts\\Aero\\tailfin\\model.mu","aero"]
+    partdir['wingConnector']            = ["\\GameData\\Squad\\SPP\\Wings\\connector1.mu","aero"]
+    partdir['wingConnector2']           = ["\\GameData\\Squad\\SPP\\Wings\\connector2.mu","aero"]
+    partdir['wingConnector3']           = ["\\GameData\\Squad\\SPP\\Wings\\connector3.mu","aero"]
+    partdir['wingConnector4']           = ["\\GameData\\Squad\\SPP\\Wings\\connector4.mu","aero"]
+    partdir['wingConnector5']           = ["\\GameData\\Squad\\SPP\\Wings\\connector5.mu","aero"]
+    partdir['wingStrake']               = ["\\GameData\\Squad\\SPP\\Wings\\strake.mu","aero"]
+    partdir['airScoop']                 = ["\\GameData\\Squad\\Parts\\Utility\\airIntakeRadialXM-G50\\model.mu","aero"]
     
     # Utility
-    partdir['GrapplingDevice']          = "\\GameData\\NASAmission\\Parts\\GrapplingDevice\\GrapplingArm.mu"
-    partdir['dockingPort2']             = "\\GameData\\Squad\\Parts\\Utility\\dockingPort\\model.mu"
-    partdir['dockingPort3']             = "\\GameData\\Squad\\Parts\\Utility\\dockingPortJr\\model.mu"
-    partdir['dockingPortLarge']         = "\\GameData\\Squad\\Parts\\Utility\\dockingPortSr\\model.mu"
-    partdir['dockingPort1']             = "\\GameData\\Squad\\Parts\\Utility\\dockingPortShielded\\model.mu"
-    partdir['largeSolarPanel']          = "\\GameData\\Squad\\Parts\\Electrical\\gigantorXlSolarArray\\model.mu"
-    partdir['spotLight1']               = "\\GameData\\Squad\\Parts\\Utility\\spotLightMk1\\model.mu"
-    partdir['spotLight2']               = "\\GameData\\Squad\\Parts\\Utility\\spotLightMk2\\model.mu"
-    partdir['dockingPortLateral']       = "\\GameData\\Squad\\Parts\\Utility\\dockingPortInline\\model.mu"
-    partdir['LaunchEscapeSystem']       = "\\GameData\\NASAmission\\Parts\\LaunchEscapeSystem\\LaunchEscapeSystem.mu"
-    partdir['landingLeg1']              = "\\GameData\\Squad\\Parts\\Utility\\landingLegLT-1\\model.mu"
-    partdir['landingLeg1-2']            = "\\GameData\\Squad\\Parts\\Utility\\landingLegLT-2\\model.mu"
-    partdir['miniLandingLeg']           = "\\GameData\\Squad\\Parts\\Utility\\landingLegLT-5\\model.mu"
-    partdir['parachuteSingle']          = "\\GameData\\Squad\\Parts\\Utility\\parachuteMk1\\model.mu"
-    partdir['parachuteLarge']           = "\\GameData\\Squad\\Parts\\Utility\\parachuteMk16-XL\\model.mu"
-    partdir['mk2CargoBayS']             = "\\GameData\\Squad\\SPP\\Mk2CargoBay\\BaySmall.mu"
-    partdir['mk2CargoBayL']             = "\\GameData\\Squad\\SPP\\Mk2CargoBay\\BayLarge.mu"
-    partdir['mk2DockingPort']           = "\\GameData\\Squad\\SPP\\Mk2DockingPort\\model.mu"
-    partdir['mk2CrewCabin']             = "\\GameData\\Squad\\SPP\\Mk2CrewCabin\\model.mu"
-    partdir['parachuteDrogue']          = "\\GameData\\Squad\\Parts\\Utility\\parachuteMk25\\model.mu"
-    partdir['parachuteRadial']          = "\\GameData\\Squad\\Parts\\Utility\\parachuteMk2-R\\model.mu"
-    partdir['mk3CargoBayL']             = "\\GameData\\Squad\\Parts\\Mk3\\Mk3CargoBay\\long.mu"
-    partdir['mk3CargoBayS']             = "\\GameData\\Squad\\Parts\\Mk3\\Mk3CargoBay\\short.mu"
-    partdir['mk3CargoBayM']             = "\\GameData\\Squad\\Parts\\Mk3\\Mk3CargoBay\\medium.mu"
-    partdir['mk3CrewCabin']             = "\\GameData\\Squad\\Parts\\Mk3\\Mk3Fuselage\\CREW.mu"
-    partdir['solarPanels4']             = "\\GameData\\Squad\\Parts\\Electrical\\1x6SolarPanels\\model.mu"
-    partdir['solarPanels3']             = "\\GameData\\Squad\\Parts\\Electrical\\2x3SolarPanels\\model.mu"
-    partdir['solarPanels5']             = "\\GameData\\Squad\\Parts\\Electrical\\radialFlatSolarPanel\\model.mu"
-    partdir['rtg']                      = "\\GameData\\Squad\\Parts\\Electrical\\RTG\\model.mu"
-    partdir['ladder1']                  = "\\GameData\\Squad\\Parts\\Utility\\ladderRadial\\model.mu"
-    partdir['crewCabin']                = "\\GameData\\Squad\\Parts\\Command\\hitchhikerStorageContainer\\model.mu"
-    partdir['roverWheel1']              = "\\GameData\\Squad\\Parts\\Wheel\\roverWheelM1\\model.mu"
-    partdir['roverWheel2']              = "\\GameData\\Squad\\Parts\\Wheel\\roverWheelS2\\model.mu"
-    partdir['roverWheel3']              = "\\GameData\\Squad\\Parts\\Wheel\\roverWheelXL3\\model.mu"
-    partdir['SmallGearBay']             = "\\GameData\\Squad\\Parts\\Wheel\\SmallGearBay\\model.mu"
-    partdir['solarPanels2']             = "\\GameData\\Squad\\Parts\\Electrical\\1x6ShroudSolarPanels\\model.mu"
-    partdir['solarPanels1']             = "\\GameData\\Squad\\Parts\\Electrical\\2x3ShroudSolarPanels\\model.mu"
-    partdir['telescopicLadder']         = "\\GameData\\Squad\\Parts\\Utility\\ladderTelescopic\\model.mu"
-    partdir['telescopicLadderBay']      = "\\GameData\\Squad\\Parts\\Utility\\ladderTelescopicBay\\model.mu"
-    partdir['wheelMed']                 = "\\GameData\\Squad\\Parts\\Wheel\\roverWheelTR-2L\\model.mu"
-    partdir['batteryPack']              = "\\GameData\\Squad\\Parts\\Electrical\\z-100Battery\\model.mu"
-    partdir['batteryBank']              = "\\GameData\\Squad\\Parts\\Electrical\\z-1kBattery\\model.mu"
-    partdir['batteryBankMini']          = "\\GameData\\Squad\\Parts\\Electrical\\z-200Battery\\model.mu"
-    partdir['ksp.r.largeBatteryPack']   = "\\GameData\\Squad\\Parts\\Electrical\\z-400Battery\\model.mu"
-    partdir['batteryBankLarge']         = "\\GameData\\Squad\\Parts\\Electrical\\z-4kBattery\\model.mu"
+    partdir['GrapplingDevice']          = ["\\GameData\\NASAmission\\Parts\\GrapplingDevice\\GrapplingArm.mu","utility"]
+    partdir['dockingPort2']             = ["\\GameData\\Squad\\Parts\\Utility\\dockingPort\\model.mu","utility"]
+    partdir['dockingPort3']             = ["\\GameData\\Squad\\Parts\\Utility\\dockingPortJr\\model.mu","utility"]
+    partdir['dockingPortLarge']         = ["\\GameData\\Squad\\Parts\\Utility\\dockingPortSr\\model.mu","utility"]
+    partdir['dockingPort1']             = ["\\GameData\\Squad\\Parts\\Utility\\dockingPortShielded\\model.mu","utility"]
+    partdir['largeSolarPanel']          = ["\\GameData\\Squad\\Parts\\Electrical\\gigantorXlSolarArray\\model.mu","utility"]
+    partdir['spotLight1']               = ["\\GameData\\Squad\\Parts\\Utility\\spotLightMk1\\model.mu","utility"]
+    partdir['spotLight2']               = ["\\GameData\\Squad\\Parts\\Utility\\spotLightMk2\\model.mu","utility"]
+    partdir['dockingPortLateral']       = ["\\GameData\\Squad\\Parts\\Utility\\dockingPortInline\\model.mu","utility"]
+    partdir['LaunchEscapeSystem']       = ["\\GameData\\NASAmission\\Parts\\LaunchEscapeSystem\\LaunchEscapeSystem.mu","utility"]
+    partdir['landingLeg1']              = ["\\GameData\\Squad\\Parts\\Utility\\landingLegLT-1\\model.mu","utility"]
+    partdir['landingLeg1-2']            = ["\\GameData\\Squad\\Parts\\Utility\\landingLegLT-2\\model.mu","utility"]
+    partdir['miniLandingLeg']           = ["\\GameData\\Squad\\Parts\\Utility\\landingLegLT-5\\model.mu","utility"]
+    partdir['parachuteSingle']          = ["\\GameData\\Squad\\Parts\\Utility\\parachuteMk1\\model.mu","utility"]
+    partdir['parachuteLarge']           = ["\\GameData\\Squad\\Parts\\Utility\\parachuteMk16-XL\\model.mu","utility"]
+    partdir['mk2CargoBayS']             = ["\\GameData\\Squad\\SPP\\Mk2CargoBay\\BaySmall.mu","utility"]
+    partdir['mk2CargoBayL']             = ["\\GameData\\Squad\\SPP\\Mk2CargoBay\\BayLarge.mu","utility"]
+    partdir['mk2DockingPort']           = ["\\GameData\\Squad\\SPP\\Mk2DockingPort\\model.mu","utility"]
+    partdir['mk2CrewCabin']             = ["\\GameData\\Squad\\SPP\\Mk2CrewCabin\\model.mu","utility"]
+    partdir['parachuteDrogue']          = ["\\GameData\\Squad\\Parts\\Utility\\parachuteMk25\\model.mu","utility"]
+    partdir['parachuteRadial']          = ["\\GameData\\Squad\\Parts\\Utility\\parachuteMk2-R\\model.mu","utility"]
+    partdir['mk3CargoBayL']             = ["\\GameData\\Squad\\Parts\\Mk3\\Mk3CargoBay\\long.mu","utility"]
+    partdir['mk3CargoBayS']             = ["\\GameData\\Squad\\Parts\\Mk3\\Mk3CargoBay\\short.mu","utility"]
+    partdir['mk3CargoBayM']             = ["\\GameData\\Squad\\Parts\\Mk3\\Mk3CargoBay\\medium.mu","utility"]
+    partdir['mk3CrewCabin']             = ["\\GameData\\Squad\\Parts\\Mk3\\Mk3Fuselage\\CREW.mu","utility"]
+    partdir['solarPanels4']             = ["\\GameData\\Squad\\Parts\\Electrical\\1x6SolarPanels\\model.mu","utility"]
+    partdir['solarPanels3']             = ["\\GameData\\Squad\\Parts\\Electrical\\2x3SolarPanels\\model.mu","utility"]
+    partdir['solarPanels5']             = ["\\GameData\\Squad\\Parts\\Electrical\\radialFlatSolarPanel\\model.mu","utility"]
+    partdir['rtg']                      = ["\\GameData\\Squad\\Parts\\Electrical\\RTG\\model.mu","utility"]
+    partdir['ladder1']                  = ["\\GameData\\Squad\\Parts\\Utility\\ladderRadial\\model.mu","utility"]
+    partdir['crewCabin']                = ["\\GameData\\Squad\\Parts\\Command\\hitchhikerStorageContainer\\model.mu","utility"]
+    partdir['roverWheel1']              = ["\\GameData\\Squad\\Parts\\Wheel\\roverWheelM1\\model.mu","utility"]
+    partdir['roverWheel2']              = ["\\GameData\\Squad\\Parts\\Wheel\\roverWheelS2\\model.mu","utility"]
+    partdir['roverWheel3']              = ["\\GameData\\Squad\\Parts\\Wheel\\roverWheelXL3\\model.mu","utility"]
+    partdir['SmallGearBay']             = ["\\GameData\\Squad\\Parts\\Wheel\\SmallGearBay\\model.mu","utility"]
+    partdir['solarPanels2']             = ["\\GameData\\Squad\\Parts\\Electrical\\1x6ShroudSolarPanels\\model.mu","utility"]
+    partdir['solarPanels1']             = ["\\GameData\\Squad\\Parts\\Electrical\\2x3ShroudSolarPanels\\model.mu","utility"]
+    partdir['telescopicLadder']         = ["\\GameData\\Squad\\Parts\\Utility\\ladderTelescopic\\model.mu","utility"]
+    partdir['telescopicLadderBay']      = ["\\GameData\\Squad\\Parts\\Utility\\ladderTelescopicBay\\model.mu","utility"]
+    partdir['wheelMed']                 = ["\\GameData\\Squad\\Parts\\Wheel\\roverWheelTR-2L\\model.mu","utility"]
+    partdir['batteryPack']              = ["\\GameData\\Squad\\Parts\\Electrical\\z-100Battery\\model.mu","utility"]
+    partdir['batteryBank']              = ["\\GameData\\Squad\\Parts\\Electrical\\z-1kBattery\\model.mu","utility"]
+    partdir['batteryBankMini']          = ["\\GameData\\Squad\\Parts\\Electrical\\z-200Battery\\model.mu","utility"]
+    partdir['ksp.r.largeBatteryPack']   = ["\\GameData\\Squad\\Parts\\Electrical\\z-400Battery\\model.mu","utility"]
+    partdir['batteryBankLarge']         = ["\\GameData\\Squad\\Parts\\Electrical\\z-4kBattery\\model.mu","utility"]
     
     # Science
-    partdir['sensorThermometer']        = "\\GameData\\Squad\\Parts\\Utility\\sensorThermometer\\model.mu"
-    partdir['mediumDishAntenna']        = "\\GameData\\Squad\\Parts\\Utility\\commsAntennaDTS-M1\\mediumDishAntenna.mu"
-    partdir['longAntenna']              = "\\GameData\\Squad\\Parts\\Utility\\commsDish16\\model.mu"
-    partdir['commDish']                 = "\\GameData\\Squad\\Parts\\Utility\\commDish88-88\\model.mu"
-    partdir['sensorAccelerometer']      = "\\GameData\\Squad\\Parts\\Utility\\sensorAccelerometer\\model.mu"
-    partdir['sensorGravimeter']         = "\\GameData\\Squad\\Parts\\Utility\\sensorGravimeter\\model.mu"
-    partdir['Large.Crewed.Lab']         = "\\GameData\\Squad\\Parts\\Science\\LargeCrewedLab\\large_crewed_lab.mu"
-    partdir['GooExperiment']            = "\\GameData\\Squad\\Parts\\Science\\GooExperiment\\GooExperiment.mu"
-    partdir['sensorBarometer']          = "\\GameData\\Squad\\Parts\\Utility\\sensorBarometer\\model.mu"
-    partdir['science.module']           = "\\GameData\\Squad\\Parts\\Science\\MaterialBay\\science_module_small.mu"
-    partdir['avionicsNoseCone']         = "\\GameData\\Squad\\Parts\\Science\\avionicsNoseCone\\model.mu"
+    partdir['sensorThermometer']        = ["\\GameData\\Squad\\Parts\\Utility\\sensorThermometer\\model.mu","science"]
+    partdir['mediumDishAntenna']        = ["\\GameData\\Squad\\Parts\\Utility\\commsAntennaDTS-M1\\mediumDishAntenna.mu","science"]
+    partdir['longAntenna']              = ["\\GameData\\Squad\\Parts\\Utility\\commsDish16\\model.mu","science"]
+    partdir['commDish']                 = ["\\GameData\\Squad\\Parts\\Utility\\commDish88-88\\model.mu","science"]
+    partdir['sensorAccelerometer']      = ["\\GameData\\Squad\\Parts\\Utility\\sensorAccelerometer\\model.mu","science"]
+    partdir['sensorGravimeter']         = ["\\GameData\\Squad\\Parts\\Utility\\sensorGravimeter\\model.mu","science"]
+    partdir['Large.Crewed.Lab']         = ["\\GameData\\Squad\\Parts\\Science\\LargeCrewedLab\\large_crewed_lab.mu","science"]
+    partdir['GooExperiment']            = ["\\GameData\\Squad\\Parts\\Science\\GooExperiment\\GooExperiment.mu","science"]
+    partdir['sensorBarometer']          = ["\\GameData\\Squad\\Parts\\Utility\\sensorBarometer\\model.mu","science"]
+    partdir['science.module']           = ["\\GameData\\Squad\\Parts\\Science\\MaterialBay\\science_module_small.mu","science"]
+    partdir['avionicsNoseCone']         = ["\\GameData\\Squad\\Parts\\Science\\avionicsNoseCone\\model.mu","science"]
 
     return partdir
+
+#############################
+### PARSING STUFF
+#############################
 
 partdir = partdirectory()
 
@@ -352,6 +362,7 @@ class part:
         self.part = None
         self.partNumber = None
         self.partName = None
+        self.partClass = None
         self.pos = None
         self.attPos = None
         self.attPos0 = None
@@ -488,6 +499,9 @@ class srfN:
         self.partNumber = int(line.split("_")[1])                               #"srfN = srfAttach,RCSTank1-2_4293083910" -> 4293083910
 
 
+#############################
+### BLENDER STUFF
+#############################
 
 def addcubes_dumb(partslist):
     """adds a cube in a dumb way with the rotation and location of each part"""
@@ -564,16 +578,36 @@ def import_parts(partslist,ksp):
     scn = bpy.context.scene                                                                                 # the active scene
     
     for part in partslist:
-        if os.path.isfile(ksp+partdir[part.partName]):                                                      # make sure the part file exists so nothing crashes
+        if os.path.isfile(ksp+partdir[part.partName][0]):                                                      # make sure the part file exists so nothing crashes
             print("\n----------------------------------------------------\n")                               # to make console output easier to look at
             if part.partName not in doneparts:                                                              # if part has not been imported...
-                print("Importing "+part.partName)                                                               # ...say so on the console
+                print("Importing "+part.partName+" as "+part.part)                                                               # ...say so on the console
                 print("\n")
-                bpy.ops.import_object.ksp_mu(filepath=ksp+partdir[part.partName])                               # call the importer
+                bpy.ops.import_object.ksp_mu(filepath=ksp+partdir[part.partName][0])                               # call the importer
                 newpart = bpy.context.active_object                                                             # set the imported part object to active. from here on, part refers to the part data structure and object to the blender object
                 newpart.name = part.part                                                                        # rename the object according to the part name (including the number)
                 newpart.location = part.pos                                                                     # move the object
                 newpart.rotation_quaternion = part.rotQ                                                         # rotate the object
+                
+                # Set a bunch of properties
+                newpart["partName"] = part.partName
+                newpart["partClass"] = partdir[part.partName][1]
+                newpart["mir"] = part.mir
+                newpart["symMethod"] = part.symMethod
+                newpart["istg"] = part.istg
+                newpart["dstg"] = part.dstg
+                newpart["sidx"] = part.sidx
+                newpart["sqor"] = part.sqor
+                newpart["attm"] = part.attm
+                newpart["modCost"] = part.modCost
+                newpart["modMass"] = part.modMass
+                newpart["modSize"] = part.modSize
+                #newpart["linklist"] = part.linklist
+                #newpart["attNlist"] = part.attNlist
+                #newpart["symlist"] = part.symlist
+                #newpart["srfNlist"] = part.srfNlist ### FIX THESE
+                
+                
             else:                                                                                           # but if part has been imported...
                 hiddenlist = []                                                                                 # clunky workaround
                 for obj in bpy.data.objects:                                                                    # hidden objects cannot be modified (duplication is what I want to do)
@@ -582,15 +616,16 @@ def import_parts(partslist,ksp):
                         scn.objects.active = obj                                                                    # always need to do this to get things to actually happen to objects
                         obj.hide = False                                                                            # unhide each one
                 bpy.ops.object.select_all(action = 'DESELECT')                                                  # deselect everything
-                print("Duplicating "+part.partName+"\n")                                                        # let me know if the part is just being duplicated
+                print("Duplicating "+part.partName+" as "+part.part+"\n")                                                        # let me know if the part is just being duplicated
                 oldpart = bpy.data.objects[doneparts[part.partName]]                                            # have to select the object (2 step process)
                 oldpart.select = True
                 bpy.context.scene.objects.active = oldpart
+                print(oldpart)
                 bpy.ops.object.select_grouped(type = 'CHILDREN_RECURSIVE')                                      # select all children of the parent object (the empty), which deselects the parent
                 bpy.data.objects[doneparts[part.partName]].select = True                                        # so reselect the parent
                 
                 bpy.ops.object.duplicate_move_linked()                                                          # duplicate the whole family
-                copiedpart = doneparts[part.partName] + ".001"                                                  # the duplicate will be called part.part.001 always
+                copiedpart = oldpart.name + ".001"                                                             # the duplicate will be called something.001 always
                 bpy.ops.object.select_all(action = 'DESELECT')                                                  # deselect everything
                 newpart = bpy.data.objects[copiedpart]                                                          # and select just the parent (again, multi-step process)
                 newpart.select = True
@@ -643,12 +678,32 @@ def import_parts(partslist,ksp):
                 #bpy.ops.object.delete()                                                                            # I could just delete it
                 if obj.type != 'EMPTY':                                                                             # and if it is a mesh (the empties have already been hidden, so this is a double-tap on them)...
                     print(obj.name + " Hidden\n")                                                                       # ...let me know
+
+    bpy.ops.object.select_all(action = 'DESELECT')
+    print("\n----------------------------------------------------\n") 
+
         
-            
+def fairing_fixer(partslist):
+    """Unhides fairings if there is a part connected to the bottom of the engine"""
+    for part in partslist:
+        if partdir[part.partName][1] == "engine":
+            for attN in part.attNlist:
+                if attN.loc == "bottom":
+                    root = bpy.data.objects[part.part]
+                    queue = [child for child in root.children]
+                    while len(queue) > 0:
+                        current = queue.pop(0)
+                        if "fair" in current.name:
+                            current.hide = False
+                            current.hide_render = False
+                        for child in current.children:
+                            queue.append(child)
+                    
+                    
     
 def run():
     """runs"""
-    mycraft = kspcraft('Kerbal 2.craft')
+    mycraft = kspcraft('Kerbal 2X.craft')
     print("\n")
     print("         A          ")
     print("        / \\        ")
@@ -664,10 +719,12 @@ def run():
     print("    @ @@@@ @@@ @    ")
     print("  @   @  @@  @   @  ")
     print("\n")
+    
+    print(mycraft.ship + ' ready for takeoff\n')
     print(str(mycraft.num_parts()) + ' parts found...')
-    #add_parts(mycraft.partslist)
     
     import_parts(mycraft.partslist,kspexedirectory)
+    fairing_fixer(mycraft.partslist)
     return mycraft
 
 mycraft = run()
