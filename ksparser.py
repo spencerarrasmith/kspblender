@@ -1,4 +1,4 @@
-# KSPBlender 1.04
+# KSPBlender 1.05
 # 1/1/15
 # Spencer Arrasmith
 
@@ -56,7 +56,7 @@ def partdirectory():
     partdir['fuelTankSmall']            = ["\\GameData\\Squad\\Parts\\FuelTank\\fuelTankT200\\model.mu","fuel"]
     partdir['fuelTank']                 = ["\\GameData\\Squad\\Parts\\FuelTank\\fuelTankT400\\model.mu","fuel"]
     partdir['fuelTank.long']            = ["\\GameData\\Squad\\Parts\\FuelTank\\fuelTankT800\\model.mu","fuel"]
-    partdir['fuelLine']                 = ["\\GameData\\Squad\\Parts\\CompoundParts\\fuelLine\\model.mu","fuel"]
+    partdir['fuelLine']                 = ["\\GameData\\Squad\\Parts\\CompoundParts\\fuelLine\\model.mu","fuelline"]
     partdir['Size3LargeTank']           = ["\\GameData\\NASAmission\\Parts\\Size3LargeTank\\Size3LargeTank.mu","fuel"]
     partdir['Size3SmallTank']           = ["\\GameData\\NASAmission\\Parts\\Size3SmallTank\\Size3SmallTank.mu","fuel"]
     partdir['Size3MediumTank']          = ["\\GameData\\NASAmission\\Parts\\Size3MediumTank\\Size3MediumTank.mu","fuel"]
@@ -129,7 +129,7 @@ def partdirectory():
     # Structural
     partdir['stackPoint1']              = ["\\GameData\\Squad\\Parts\\Utility\\radialAttachmentPoint\\model.mu","structural"]
     partdir['strutCube']                = ["\\GameData\\Squad\\Parts\\Structural\\strutCubicOcto\\model.mu","structural"]
-    partdir['strutConnector']           = ["\\GameData\\Squad\\Parts\\CompoundParts\\strutConnector\\model.mu","structural"]
+    partdir['strutConnector']           = ["\\GameData\\Squad\\Parts\\CompoundParts\\strutConnector\\model.mu","strut"]
     partdir['adapterSmallMiniTall']     = ["\\GameData\\Squad\\Parts\\Structural\\adapterSmallMiniTall\\model.mu","structural"]
     partdir['adapterSmallMiniShort']    = ["\\GameData\\Squad\\Parts\\Structural\\adapterSmallMiniShort\\model.mu","structural"]
     partdir['radialDecoupler1-2']       = ["\\GameData\\Squad\\Parts\\Utility\\decouplerRadialHDM\\model.mu","structural"]
@@ -159,7 +159,7 @@ def partdirectory():
     partdir['stackDecouplerMini']       = ["\\GameData\\Squad\\Parts\\Utility\\decouplerStackTR-2V\\model.mu","structural"]
     partdir['size3Decoupler']           = ["\\GameData\\NASAmission\\Parts\\Size3Decoupler\\Size3Decoupler.mu","structural"]
     partdir['stackSeparatorBig']        = ["\\GameData\\Squad\\Parts\\Utility\\decouplerSeparatorTR-XL\\model.mu","structural"]
-    partdir['launchClamp1']             = ["\\GameData\\Squad\\Parts\\Utility\\launchClamp1\\model.mu","structural"]
+    partdir['launchClamp1']             = ["\\GameData\\Squad\\Parts\\Utility\\launchClamp1\\model.mu","launchclamp"]
     partdir['radialDecoupler']          = ["\\GameData\\Squad\\Parts\\Utility\\decouplerRadialTT-38K\\model.mu","structural"]
     partdir['radialDecoupler2']         = ["\\GameData\\Squad\\Parts\\Utility\\decouplerRadialTT-70\\model.mu","structural"]
     partdir['stackTriCoupler']          = ["\\GameData\\Squad\\Parts\\Utility\\stackTriCoupler\\model.mu","structural"]
@@ -299,7 +299,7 @@ def zup_quat(line):
     """changes from Unity Y-up Left-Handed Quaternion to Blender Z-up Right-Handed Quaternion"""
     zup = [float(i) for i in line.split(" ")[-1].split(",")]
     zup = mathutils.Quaternion([0-zup[3], zup[0], zup[2], zup[1]])
-    return (zup[0],zup[1],zup[2],zup[3])
+    return zup
 
 
 class kspcraft:
@@ -403,12 +403,12 @@ class part:
             if line.split()[0] == "attPos0":
                 self.attPos0 = zup_tuple(line)                                  #"attPos0 = 0,0,0" -> (0,0,0) y<>z, seems to always be (0,0,0) also
             if line.split()[0] == "rot":
-                self.rot = zup_eul(line)                                        #"rot = 0,0,0,1" -> (-1,0,0,0) w to beginning, y<>z, made right-handed, converted to Euler angles
+                self.rot = zup_eul(line)                                        #"rot = 0,0,0,1" -> (0,0,0) y<>z, made right-handed, converted to Euler angles
                 self.rotQ = zup_quat(line)                                      #"rot = 0,0,0,1" -> (-1,0,0,0) w to beginning, y<>z, made right-handed
             if line.split()[0] == "attRot":
-                self.attRot = zup_eul(line)                                     #"attRot = 0,0,0,1" -> (-1,0,0,0) w to beginning, y<>z, made right-handed
+                self.attRot = zup_quat(line)                                    #"attRot = 0,0,0,1" -> (-1,0,0,0) w to beginning, y<>z, made right-handed
             if line.split()[0] == "attRot0":
-                self.attRot0 = zup_eul(line)                                    #"attRot0 = 0,0,0,1" -> (-1,0,0,0) w to beginning, y<>z, made right-handed
+                self.attRot0 = zup_quat(line)                                   #"attRot0 = 0,0,0,1" -> (-1,0,0,0) w to beginning, y<>z, made right-handed
             if line.split()[0] == "mir":
                 self.mir = zup_tuple(line)                                      #"mir = 1,1,1" -> (1,1,1) not really sure what this is for
             if line.split()[0] == "symMethod":
@@ -576,6 +576,7 @@ def import_parts(partslist,ksp):
     doneparts = {}                                                                                          # keep track of parts that have already been imported so I can save time
     doneobj = set(bpy.data.objects)                                                                         # know which objects have gone through the cleaning process
     scn = bpy.context.scene                                                                                 # the active scene
+    cursor_loc = get_cursor_location()
     
     for part in partslist:
         if os.path.isfile(ksp+partdir[part.partName][0]):                                                      # make sure the part file exists so nothing crashes
@@ -586,7 +587,7 @@ def import_parts(partslist,ksp):
                 bpy.ops.import_object.ksp_mu(filepath=ksp+partdir[part.partName][0])                               # call the importer
                 newpart = bpy.context.active_object                                                             # set the imported part object to active. from here on, part refers to the part data structure and object to the blender object
                 newpart.name = part.part                                                                        # rename the object according to the part name (including the number)
-                newpart.location = part.pos                                                                     # move the object
+                newpart.location = mathutils.Vector(part.pos)+cursor_loc                                                          # move the object
                 newpart.rotation_quaternion = part.rotQ                                                         # rotate the object
                 
                 # Set a bunch of properties
@@ -632,60 +633,80 @@ def import_parts(partslist,ksp):
                 bpy.context.scene.objects.active = newpart
                 print(bpy.context.active_object)
                 newpart.name = part.part                                                                        # rename it
-                newpart.location = part.pos                                                                     # move it
+                newpart.location = mathutils.Vector(part.pos)+cursor_loc                                                          # move it
                 newpart.rotation_quaternion = part.rotQ                                                         # rotate it
                 for obj in hiddenlist:                                                                          # hide all that annoying stuff again
                     obj.hide = True
         
         else:
             print("Failed to load "+part.partName+"... gotta fix that\n")                                   # if the part doesn't exist, let me know
-        
-        objlist = set([obj for obj in bpy.data.objects if obj not in doneobj])                              # find all the newly added objects
-        doneobj = set(bpy.data.objects)                                                                     # done dealing with all the objects that are now in the scene (except for the ones I'm about to work with in objlist)
-        
+
         if part.partName not in doneparts:                                                                  # if the part hasn't been imported before...
             doneparts[part.partName] = part.part                                                            # ...it has now
-            
-        for obj in objlist:                                                                                 # for all the unprocesses objects
-            print(obj.name)                                                                                     # let me know which one we're on
-            if obj.type == 'EMPTY':                                                                             # if it's an Empty object
-                if obj.parent != None:                                                                              # if the Empty is not top-level
-                    obj.hide = True                                                                                     # hide that shyet
-                    print(obj.name + " Hidden\n")                                                                       # and tell me that they're gone
-                else:                                                                                               # but if it is top level
-                    obj.empty_draw_type = 'SPHERE'                                                                      # make that shyet a sphere
-                    obj.empty_draw_size = 0                                                                             # a hella tiny sphere
-            if obj.type == 'MESH':                                                                              # if it's a Mesh object
-                scn.objects.active = obj                                                                            # make it active
-                if "KSP" not in obj.name:
-                    while len(obj.data.materials) > 0:
-                        obj.data.materials.pop(0, update_data=True)
-                        bpy.ops.object.material_slot_remove()
-                bpy.ops.object.mode_set(mode='EDIT')                                                                # go into edit mode
-                bpy.ops.mesh.remove_doubles(threshold = 0.0001)                                                     # remove double vertices
-                bpy.ops.mesh.normals_make_consistent(inside = False)                                                # fix normals
-                bpy.ops.object.mode_set(mode='OBJECT')                                                              # leave edit mode
-                if len(obj.data.polygons) == 0:                                                                     # and if it's one of them stupid fake meshes with no faces
-                    obj.hide = True                                                                                 # gtfo
-                    
-                maxrad = math.sqrt((obj.dimensions[0]/2)**2 + (obj.dimensions[1]/2)**2 + (obj.dimensions[2]/2)**2)  # find the radius of the parent Empty such that it encloses the object
-                root = obj
-                while root.parent != None:                                                                          # need to navigate to the uppermost parent
-                    root = root.parent                                                                                  # and I can do it by jumping from child to parent until there is no parent
-                if root.empty_draw_size < maxrad:                                                                   # make the empty big enough to enclose the biggest mesh found
-                    root.empty_draw_size = maxrad                                                                       # and only update it if it's increasing in size (starts at 0, so it definitely should)
+
+        objlist = set([obj for obj in bpy.data.objects if obj not in doneobj])                              # find all the newly added objects
+        
+        doneobj = set(bpy.data.objects)                                                                     # done dealing with all the objects that are now in the scene (except for the ones I'm about to work with in objlist)
                 
-            if "coll" in obj.name or "COL" in obj.name or "fair" in obj.name and 'KSP' not in obj.name:         # if it is named anything to do with collider, I'll have none of it
-                obj.hide = True                                                                                     # gtfo
-                obj.hide_render = True                                                                              # really gtfo (don't even render)
-                #object.select = True                                                                               # and if I'm really mad
-                #bpy.ops.object.delete()                                                                            # I could just delete it
-                if obj.type != 'EMPTY':                                                                             # and if it is a mesh (the empties have already been hidden, so this is a double-tap on them)...
-                    print(obj.name + " Hidden\n")                                                                       # ...let me know
+        if partdir[part.partName][1] == "strut":
+            add_strut(part)
+            
+        elif partdir[part.partName][1] == "fuelline":
+            add_fuelline(part)
+            
+        elif partdir[part.partName][1] == "launchclamp":
+            add_launchclamp(part)
+                    
+        else:    
+            for obj in objlist:                                                                                 # for all the unprocesses objects
+                print(obj.name)                                                                                     # let me know which one we're on
+                if obj.type == 'EMPTY':                                                                             # if it's an Empty object
+                    if obj.parent != None:                                                                              # if the Empty is not top-level
+                        obj.hide = True                                                                                     # hide that shyet
+                        print(obj.name + " Hidden\n")                                                                       # and tell me that they're gone
+                    else:                                                                                               # but if it is top level
+                        obj.empty_draw_type = 'SPHERE'                                                                      # make that shyet a sphere
+                        obj.empty_draw_size = 0                                                                             # a hella tiny sphere
+                if obj.type == 'MESH':                                                                              # if it's a Mesh object
+                    scn.objects.active = obj                                                                            # make it active
+                    if "KSP" not in obj.name:
+                        while len(obj.data.materials) > 0:
+                            obj.data.materials.pop(0, update_data=True)
+                            bpy.ops.object.material_slot_remove()
+                    bpy.ops.object.mode_set(mode='EDIT')                                                                # go into edit mode
+                    bpy.ops.mesh.remove_doubles(threshold = 0.0001)                                                     # remove double vertices
+                    bpy.ops.mesh.normals_make_consistent(inside = False)                                                # fix normals
+                    bpy.ops.object.mode_set(mode='OBJECT')                                                              # leave edit mode
+                    if len(obj.data.polygons) == 0:                                                                     # and if it's one of them stupid fake meshes with no faces
+                        obj.hide = True                                                                                 # gtfo
+                        
+                    maxrad = math.sqrt((obj.dimensions[0]/2)**2 + (obj.dimensions[1]/2)**2 + (obj.dimensions[2]/2)**2)  # find the radius of the parent Empty such that it encloses the object
+                    root = obj
+                    while root.parent != None:                                                                          # need to navigate to the uppermost parent
+                        root = root.parent                                                                                  # and I can do it by jumping from child to parent until there is no parent
+                    if root.empty_draw_size < maxrad:  ####SOMETHING RETARDED IS HAPPENING HERE                        # make the empty big enough to enclose the biggest mesh found
+                        root.empty_draw_size = maxrad                                                                       # and only update it if it's increasing in size (starts at 0, so it definitely should)
+                    
+                if "coll" in obj.name or "COL" in obj.name or "fair" in obj.name and 'KSP' not in obj.name:         # if it is named anything to do with collider, I'll have none of it
+                    obj.hide = True                                                                                     # gtfo
+                    obj.hide_render = True                                                                              # really gtfo (don't even render)
+                    #object.select = True                                                                               # and if I'm really mad
+                    #bpy.ops.object.delete()                                                                            # I could just delete it
+                    if obj.type != 'EMPTY':                                                                             # and if it is a mesh (the empties have already been hidden, so this is a double-tap on them)...
+                        print(obj.name + " Hidden\n")                                                                       # ...let me know
 
     bpy.ops.object.select_all(action = 'DESELECT')
     print("\n----------------------------------------------------\n") 
 
+def get_cursor_location():
+    areas = {}                                                               
+    count = 0
+    for area in bpy.context.screen.areas:                                  
+        areas[area.type] = count                                             
+        count += 1
+
+    view3d = bpy.context.screen.areas[areas['VIEW_3D']].spaces[0]
+    return(view3d.cursor_location)
         
 def fairing_fixer(partslist):
     """Unhides fairings if there is a part connected to the bottom of the engine"""
@@ -703,11 +724,30 @@ def fairing_fixer(partslist):
                         for child in current.children:
                             queue.append(child)
                     
-                    
+def add_strut(part):     
+    root = bpy.data.objects[part.part]
+    for child in root.children[0].children:
+        if "anchor" in child.name:
+            anchor = child
+        if "target" in child.name:
+            target = child
+    print(root.location)
+    print(root.rotation_quaternion)
+    anchor.delta_location = mathutils.Vector(part.attPos)
+    anchor.delta_rotation_quaternion = mathutils.Quaternion(part.attRot)
+    target.location = anchor.location + mathutils.Vector(part.attPos0)
+    target.delta_rotation_quaternion = mathutils.Quaternion(part.attRot0)
+    
+    
+def add_fuelline(part):     
+    print(1)
+    
+def add_launchclamp(part):   
+    print(1)                 
     
 def run():
     """runs"""
-    mycraft = kspcraft('Kerbal 2X.craft')
+    mycraft = kspcraft('KERBAL X.craft')
     print("\n")
     print("         A          ")
     print("        / \\        ")
