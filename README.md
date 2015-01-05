@@ -9,7 +9,7 @@ This is all based around the python file ksparser.py, which operates on a given 
 HOW TO USE DEMO:
 
 1. Download Blender from http://blender.org
-2. Download .mu importer Blender addon from https://github.com/taniwha-qf/io\_object\_mu
+2. Download .mu importer Blender addon from https://github.com/taniwha-qf/io_object_mu
 3. Extract, put "io\_object\_mu\_master" folder (the whole folder) in Program Files\Blender Foundation\Blender\2.72\scripts\addons
 4. Download kspblenderdemo.blend from this repository
 5. Place .craft file into the same folder as the Blender file (they can be found under "saves" in the KSP.exe folder)
