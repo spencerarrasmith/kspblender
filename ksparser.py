@@ -1,4 +1,4 @@
-# KSPBlender 1.05
+# KSPBlender 1.10
 # 1/1/15
 # Spencer Arrasmith
 
@@ -8,6 +8,9 @@
 
 import os, string, time
 import bpy, mathutils, math
+import materialfixer
+import scalefixer
+import materialpreserver
 os.chdir("C:\\Users\\Spencer.Satan-PC\\Art\\Projects\\ksp\\kspblender") # current working directory... need to have the .craft file in this same folder for now
 
 #FIGURE OUT A BETTER WAY TO MANAGE OPENING CONSOLE
@@ -270,6 +273,19 @@ def partdirectory():
     partdir['avionicsNoseCone']         = ["\\GameData\\Squad\\Parts\\Science\\avionicsNoseCone\\model.mu","science"]
 
     return partdir
+
+#############################
+### INCORRECTLY SCALED PARTS
+#############################
+
+right_scale = {}
+right_scale['Mark1Cockpit'] = mathutils.Vector((1.25,1.25,1.25))
+right_scale['fuelTank'] = mathutils.Vector((1.25,1.25,1.25))
+right_scale['fuelTankSmall'] = mathutils.Vector((1.25,1.25,1.25))
+right_scale['noseConeAdapter'] = mathutils.Vector((1.25,1.25,1.25))
+right_scale['standardNoseCone'] = mathutils.Vector((1.25,1.25,1.25))
+right_scale['liquidEngine2'] = mathutils.Vector((1.25,1.25,1.25))
+
 
 #############################
 ### PARSING STUFF
@@ -570,9 +586,10 @@ def import_parts_old(partslist,ksp):
                 print(object.name + " Hidden")
 
 
-def import_parts(partslist,ksp):
+def import_parts(craft,ksp,right_scale):
     """Imports parts from the ksp directory"""
     
+    partslist = craft.partslist
     doneparts = {}                                                                                          # keep track of parts that have already been imported so I can save time
     doneobj = set(bpy.data.objects)                                                                         # know which objects have gone through the cleaning process
     scn = bpy.context.scene                                                                                 # the active scene
@@ -603,6 +620,7 @@ def import_parts(partslist,ksp):
                 newpart["modCost"] = part.modCost
                 newpart["modMass"] = part.modMass
                 newpart["modSize"] = part.modSize
+                newpart["ship"] = craft.ship
                 #newpart["linklist"] = part.linklist
                 #newpart["attNlist"] = part.attNlist
                 #newpart["symlist"] = part.symlist
@@ -641,15 +659,19 @@ def import_parts(partslist,ksp):
         else:
             print("Failed to load "+part.partName+"... gotta fix that\n")                                   # if the part doesn't exist, let me know
 
+        if part.partName in right_scale and part.partName not in doneparts:
+            scaling_fixer(part, right_scale)
+        
         if part.partName not in doneparts:                                                                  # if the part hasn't been imported before...
             doneparts[part.partName] = part.part                                                            # ...it has now
 
         objlist = set([obj for obj in bpy.data.objects if obj not in doneobj])                              # find all the newly added objects
         
         doneobj = set(bpy.data.objects)                                                                     # done dealing with all the objects that are now in the scene (except for the ones I'm about to work with in objlist)
+        emptysize = []
                 
         if partdir[part.partName][1] == "strut":
-            add_strut(part)
+            add_fuelline(part)
             
         elif partdir[part.partName][1] == "fuelline":
             add_fuelline(part)
@@ -660,6 +682,7 @@ def import_parts(partslist,ksp):
         else:    
             for obj in objlist:                                                                                 # for all the unprocesses objects
                 print(obj.name)                                                                                     # let me know which one we're on
+                obj['ship'] = craft.ship
                 if obj.type == 'EMPTY':                                                                             # if it's an Empty object
                     if obj.parent != None:                                                                              # if the Empty is not top-level
                         obj.hide = True                                                                                     # hide that shyet
@@ -670,22 +693,29 @@ def import_parts(partslist,ksp):
                 if obj.type == 'MESH':                                                                              # if it's a Mesh object
                     scn.objects.active = obj                                                                            # make it active
                     if "KSP" not in obj.name:
-                        while len(obj.data.materials) > 0:
-                            obj.data.materials.pop(0, update_data=True)
-                            bpy.ops.object.material_slot_remove()
+                        if obj.data.materials:
+                            materialfixer(obj,part)
+                            print(1)
+                        #while len(obj.data.materials) > 0:
+                            #obj.data.materials.pop(0, update_data=True)
+                            #bpy.ops.object.material_slot_remove()
                     bpy.ops.object.mode_set(mode='EDIT')                                                                # go into edit mode
                     bpy.ops.mesh.remove_doubles(threshold = 0.0001)                                                     # remove double vertices
                     bpy.ops.mesh.normals_make_consistent(inside = False)                                                # fix normals
                     bpy.ops.object.mode_set(mode='OBJECT')                                                              # leave edit mode
+                    
+                    obj.select = True
+                    bpy.ops.object.shade_smooth()
+                    obj.data.use_auto_smooth = True
+                    obj.data.auto_smooth_angle = .610865
+                    bpy.ops.object.select_all(action = 'DESELECT')
+                    
                     if len(obj.data.polygons) == 0:                                                                     # and if it's one of them stupid fake meshes with no faces
                         obj.hide = True                                                                                 # gtfo
-                        
-                    maxrad = math.sqrt((obj.dimensions[0]/2)**2 + (obj.dimensions[1]/2)**2 + (obj.dimensions[2]/2)**2)  # find the radius of the parent Empty such that it encloses the object
+                    #maybe set unselectable here    
                     root = obj
-                    while root.parent != None:                                                                          # need to navigate to the uppermost parent
-                        root = root.parent                                                                                  # and I can do it by jumping from child to parent until there is no parent
-                    if root.empty_draw_size < maxrad:  ####SOMETHING RETARDED IS HAPPENING HERE                        # make the empty big enough to enclose the biggest mesh found
-                        root.empty_draw_size = maxrad                                                                       # and only update it if it's increasing in size (starts at 0, so it definitely should)
+                    meshrad = math.sqrt((obj.dimensions[0]/2)**2 + (obj.dimensions[1]/2)**2 + (obj.dimensions[2]/2)**2)  # find the radius of the parent Empty such that it encloses the object
+                    emptysize.append(meshrad)
                     
                 if "coll" in obj.name or "COL" in obj.name or "fair" in obj.name and 'KSP' not in obj.name:         # if it is named anything to do with collider, I'll have none of it
                     obj.hide = True                                                                                     # gtfo
@@ -694,6 +724,19 @@ def import_parts(partslist,ksp):
                     #bpy.ops.object.delete()                                                                            # I could just delete it
                     if obj.type != 'EMPTY':                                                                             # and if it is a mesh (the empties have already been hidden, so this is a double-tap on them)...
                         print(obj.name + " Hidden\n")                                                                       # ...let me know
+        
+#        for obj in objlist:
+#            if "KSP" not in obj.name and obj.type == 'MESH':
+#                if obj.data.materials:
+#                    materialpreserver.main(obj,part)
+        
+        scn.objects.active = bpy.data.objects[part.part]
+        if emptysize:
+            radius = max(emptysize)
+        else:
+            radius = 0.25
+        bpy.data.objects[part.part].empty_draw_size = radius
+        
 
     bpy.ops.object.select_all(action = 'DESELECT')
     print("\n----------------------------------------------------\n") 
@@ -707,6 +750,12 @@ def get_cursor_location():
 
     view3d = bpy.context.screen.areas[areas['VIEW_3D']].spaces[0]
     return(view3d.cursor_location)
+
+def scaling_fixer(part, right_scale):
+    """Some parts import with the wrong scale, and this fixed them"""
+    stupid_part = bpy.data.objects[part.part]
+    bpy.context.scene.objects.active = stupid_part
+    stupid_part.scale = right_scale[part.partName]
         
 def fairing_fixer(partslist):
     """Unhides fairings if there is a part connected to the bottom of the engine"""
@@ -723,6 +772,7 @@ def fairing_fixer(partslist):
                             current.hide_render = False
                         for child in current.children:
                             queue.append(child)
+                            
                     
 def add_strut(part):     
     root = bpy.data.objects[part.part]
@@ -745,9 +795,9 @@ def add_fuelline(part):
 def add_launchclamp(part):   
     print(1)                 
     
-def run():
+def main():
     """runs"""
-    mycraft = kspcraft('KERBAL X.craft')
+    mycraft = kspcraft('Kerbal 2X.craft')
     print("\n")
     print("         A          ")
     print("        / \\        ")
@@ -767,8 +817,10 @@ def run():
     print(mycraft.ship + ' ready for takeoff\n')
     print(str(mycraft.num_parts()) + ' parts found...')
     
-    import_parts(mycraft.partslist,kspexedirectory)
+    cursor_loc = get_cursor_location()
+    import_parts(mycraft,kspexedirectory,right_scale)
     fairing_fixer(mycraft.partslist)
+    scalefixer.main(mycraft,cursor_loc,10)
     return mycraft
 
-mycraft = run()
+mycraft = main()
