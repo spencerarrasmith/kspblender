@@ -1,5 +1,5 @@
-# KSPBlender 1.10
-# 1/1/15
+# KSPBlender 1.16
+# 1/7/15
 # Spencer Arrasmith
 
 #############################
@@ -8,7 +8,7 @@
 
 import os, string, time
 import bpy, mathutils, math
-import materialfixer
+#import materialfixer
 import scalefixer
 import materialpreserver
 os.chdir("C:\\Users\\Spencer.Satan-PC\\Art\\Projects\\ksp\\kspblender") # current working directory... need to have the .craft file in this same folder for now
@@ -286,6 +286,13 @@ right_scale['noseConeAdapter'] = mathutils.Vector((1.25,1.25,1.25))
 right_scale['standardNoseCone'] = mathutils.Vector((1.25,1.25,1.25))
 right_scale['liquidEngine2'] = mathutils.Vector((1.25,1.25,1.25))
 
+#############################
+### INCORRECT TEXTURE ASSIGNMENTS
+#############################
+
+right_tex = {}
+right_tex['liquidEngine1-2'] = 1
+right_tex['liquidEngine2-2'] = 1
 
 #############################
 ### PARSING STUFF
@@ -671,7 +678,7 @@ def import_parts(craft,ksp,right_scale):
         emptysize = []
                 
         if partdir[part.partName][1] == "strut":
-            add_fuelline(part)
+            add_strut(part)
             
         elif partdir[part.partName][1] == "fuelline":
             add_fuelline(part)
@@ -695,7 +702,7 @@ def import_parts(craft,ksp,right_scale):
                     if "KSP" not in obj.name:
                         if obj.data.materials:
                             materialfixer(obj,part)
-                            print(1)
+                            #print(1)
                         #while len(obj.data.materials) > 0:
                             #obj.data.materials.pop(0, update_data=True)
                             #bpy.ops.object.material_slot_remove()
@@ -717,7 +724,7 @@ def import_parts(craft,ksp,right_scale):
                     meshrad = math.sqrt((obj.dimensions[0]/2)**2 + (obj.dimensions[1]/2)**2 + (obj.dimensions[2]/2)**2)  # find the radius of the parent Empty such that it encloses the object
                     emptysize.append(meshrad)
                     
-                if "coll" in obj.name or "COL" in obj.name or "fair" in obj.name and 'KSP' not in obj.name:         # if it is named anything to do with collider, I'll have none of it
+                if "coll" in obj.name or "COL" in obj.name or "fair" in obj.name or "onj_strut" in obj.name and 'KSP' not in obj.name:         # if it is named anything to do with collider, I'll have none of it
                     obj.hide = True                                                                                     # gtfo
                     obj.hide_render = True                                                                              # really gtfo (don't even render)
                     #object.select = True                                                                               # and if I'm really mad
@@ -785,7 +792,7 @@ def add_strut(part):
     print(root.rotation_quaternion)
     anchor.delta_location = mathutils.Vector(part.attPos)
     anchor.delta_rotation_quaternion = mathutils.Quaternion(part.attRot)
-    target.location = anchor.location + mathutils.Vector(part.attPos0)
+    target.location = mathutils.Vector(part.attPos0)
     target.delta_rotation_quaternion = mathutils.Quaternion(part.attRot0)
     
     
@@ -794,10 +801,124 @@ def add_fuelline(part):
     
 def add_launchclamp(part):   
     print(1)                 
+
+def materialfixer(obj,part):
+    
+    #kill preexisting at some point
+
+    scn = bpy.context.scene
+    scn.objects.active = obj
+    mat = obj.data.materials[0]
+    
+    if "Material Output" in mat.node_tree.nodes:
+        return
+    
+    mat.name = part.partName+"_"+obj.name
+    
+    tx0 = mat.node_tree.nodes.new('ShaderNodeTexCoord')
+    im0 = mat.node_tree.nodes.new('ShaderNodeTexImage')
+    ma0 = mat.node_tree.nodes.new('ShaderNodeMath')
+    gl0 = mat.node_tree.nodes.new('ShaderNodeBsdfGlossy')
+    om0 = mat.node_tree.nodes.new('ShaderNodeOutputMaterial')
+    
+    location = [(550,250),(800,450),(1050,350),(1300,300),(1550,300),(800,150),(800,-150),(1300,0),(1800,300)]
+    
+    tx0.location = location[0]
+    mat.node_tree.links.new(tx0.outputs['UV'],im0.inputs['Vector'])
+    
+    
+    ma0.location = location[2]
+    mat.node_tree.links.new(ma0.outputs['Value'],gl0.inputs['Roughness'])
+    ma0.operation = "DIVIDE"
+    ma0.inputs[0].default_value = 1
+    
+    
+    gl0.location = location[3]
+    mat.node_tree.links.new(gl0.outputs['BSDF'],om0.inputs['Surface'])
+    
+    om0.location = location[4]
+    
+    im0.location = location[1]
+    mat.node_tree.links.new(im0.outputs['Color'],gl0.inputs['Color'])
+    mat.node_tree.links.new(im0.outputs['Color'],ma0.inputs[1])
+    for node in mat.node_tree.nodes:
+        if node.label == "mainTex":
+            imA = node
+            texname = part.part+"_"+obj.name+"_tex"
+            imgname = part.part+"_"+obj.name+"_img"
+            possible_img = [image for image in bpy.data.images if imA.texture.name in image.name]
+
+            if imA.texture.image:  
+                im0.image = imA.texture.image
+                im0.image.name = imgname
+                im0.image.use_alpha = False
+            if possible_img:
+                im0.image = possible_img[-1]
+                im0.image.name = imgname
+                im0.image.use_alpha = False
+            else:
+                print('Failed to find image texture')
+            
+            imA.texture.use_alpha = False
+            
+        if node.label == "bumpMap":
+            im1 = mat.node_tree.nodes.new('ShaderNodeTexImage')
+            im1.location = location[5]
+            im1.label = "Bump Texture"
+            mat.node_tree.links.new(tx0.outputs['UV'],im1.inputs['Vector'])
+            mat.node_tree.links.new(im1.outputs['Color'],om0.inputs['Displacement'])
+            #may need to scale this down
+            
+            imB = node.material.active_texture
+            texname = part.part+"_"+obj.name+"_bump"
+            imgname = part.part+"_"+obj.name+"_imgb"
+            possible_img = [image for image in bpy.data.images if imB.name in image.name]
+            if imB.image:  
+                im1.image = imB.image
+                im1.image.name = imgname
+            if possible_img:
+                im1.image = possible_img[-1]
+                im1.image.name = imgname
+            else:
+                print('Failed to find bump texture')
+        
+        if node.label == "emissive":
+            im2 = mat.node_tree.nodes.new('ShaderNodeTexImage')
+            im2.location = location[6]
+            im2.label = "Emissive Texture"
+            em0 = mat.node_tree.nodes.new('ShaderNodeEmission')
+            em0.location = location[7]
+            as0 = mat.node_tree.nodes.new('ShaderNodeAddShader')
+            as0.location = location[4]
+            om0.location = location[8]
+            
+            mat.node_tree.links.new(tx0.outputs['UV'],im2.inputs['Vector'])
+            mat.node_tree.links.new(im2.outputs['Color'],em0.inputs['Strength'])
+            mat.node_tree.links.new(im0.outputs['Color'],em0.inputs['Color'])
+            mat.node_tree.links.new(em0.outputs['Emission'],as0.inputs[1])
+            mat.node_tree.links.new(gl0.outputs['BSDF'],as0.inputs[0])
+            mat.node_tree.links.new(as0.outputs['Shader'],om0.inputs['Surface'])
+            
+            imE = node
+            texname = part.part+"_"+obj.name+"_bump"
+            imgname = part.part+"_"+obj.name+"_imgb"
+            possible_img = [image for image in bpy.data.images if imE.texture.name in image.name]
+            if imE.texture.image:  
+                im2.image = imE.texture.image
+                im2.image.name = imgname
+            if possible_img:
+                im2.image = possible_img[-1]
+                im2.image.name = imgname
+            else:
+                print('Failed to find bump texture')
+
+    
+    
+
     
 def main():
     """runs"""
-    mycraft = kspcraft('Kerbal 2X.craft')
+    mycraft = kspcraft('ADAPTIVEPARTS.craft')
     print("\n")
     print("         A          ")
     print("        / \\        ")
@@ -821,6 +942,7 @@ def main():
     import_parts(mycraft,kspexedirectory,right_scale)
     fairing_fixer(mycraft.partslist)
     scalefixer.main(mycraft,cursor_loc,10)
+    print( "All done")
     return mycraft
 
 mycraft = main()
