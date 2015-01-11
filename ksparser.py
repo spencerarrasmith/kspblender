@@ -59,7 +59,7 @@ def partdirectory():
     partdir['fuelTankSmall']            = ["\\GameData\\Squad\\Parts\\FuelTank\\fuelTankT200\\model.mu","fuel"]
     partdir['fuelTank']                 = ["\\GameData\\Squad\\Parts\\FuelTank\\fuelTankT400\\model.mu","fuel"]
     partdir['fuelTank.long']            = ["\\GameData\\Squad\\Parts\\FuelTank\\fuelTankT800\\model.mu","fuel"]
-    partdir['fuelLine']                 = ["\\GameData\\Squad\\Parts\\CompoundParts\\fuelLine\\model.mu","fuelline"]
+    partdir['fuelLine']                 = ["\\GameData\\Squad\\Parts\\CompoundParts\\fuelLine\\model.mu","fuelline"]        ########
     partdir['Size3LargeTank']           = ["\\GameData\\NASAmission\\Parts\\Size3LargeTank\\Size3LargeTank.mu","fuel"]
     partdir['Size3SmallTank']           = ["\\GameData\\NASAmission\\Parts\\Size3SmallTank\\Size3SmallTank.mu","fuel"]
     partdir['Size3MediumTank']          = ["\\GameData\\NASAmission\\Parts\\Size3MediumTank\\Size3MediumTank.mu","fuel"]
@@ -132,7 +132,7 @@ def partdirectory():
     # Structural
     partdir['stackPoint1']              = ["\\GameData\\Squad\\Parts\\Utility\\radialAttachmentPoint\\model.mu","structural"]
     partdir['strutCube']                = ["\\GameData\\Squad\\Parts\\Structural\\strutCubicOcto\\model.mu","structural"]
-    partdir['strutConnector']           = ["\\GameData\\Squad\\Parts\\CompoundParts\\strutConnector\\model.mu","strut"]
+    partdir['strutConnector']           = ["\\GameData\\Squad\\Parts\\CompoundParts\\strutConnector\\model.mu","strut"]         ########
     partdir['adapterSmallMiniTall']     = ["\\GameData\\Squad\\Parts\\Structural\\adapterSmallMiniTall\\model.mu","structural"]
     partdir['adapterSmallMiniShort']    = ["\\GameData\\Squad\\Parts\\Structural\\adapterSmallMiniShort\\model.mu","structural"]
     partdir['radialDecoupler1-2']       = ["\\GameData\\Squad\\Parts\\Utility\\decouplerRadialHDM\\model.mu","structural"]
@@ -162,7 +162,7 @@ def partdirectory():
     partdir['stackDecouplerMini']       = ["\\GameData\\Squad\\Parts\\Utility\\decouplerStackTR-2V\\model.mu","structural"]
     partdir['size3Decoupler']           = ["\\GameData\\NASAmission\\Parts\\Size3Decoupler\\Size3Decoupler.mu","structural"]
     partdir['stackSeparatorBig']        = ["\\GameData\\Squad\\Parts\\Utility\\decouplerSeparatorTR-XL\\model.mu","structural"]
-    partdir['launchClamp1']             = ["\\GameData\\Squad\\Parts\\Utility\\launchClamp1\\model.mu","launchclamp"]
+    partdir['launchClamp1']             = ["\\GameData\\Squad\\Parts\\Utility\\launchClamp1\\model.mu","launchclamp"]               ########
     partdir['radialDecoupler']          = ["\\GameData\\Squad\\Parts\\Utility\\decouplerRadialTT-38K\\model.mu","structural"]
     partdir['radialDecoupler2']         = ["\\GameData\\Squad\\Parts\\Utility\\decouplerRadialTT-70\\model.mu","structural"]
     partdir['stackTriCoupler']          = ["\\GameData\\Squad\\Parts\\Utility\\stackTriCoupler\\model.mu","structural"]
@@ -336,6 +336,7 @@ class kspcraft:
         self.type = None
         self.size = None
         self.partslist = []
+        self.partdatalist = []
 
         self.parse_file()
         self.set_data(self.lines[0:5])
@@ -367,21 +368,26 @@ class kspcraft:
         """find parts data by looking between each unindented { and the following \tEVENTS (\t is indentation)"""
         startindices = []
         endindices = []
+        partdata = []
         for i in range(len(self.lines)):
             if self.lines[i]=="{":
                 startindices.append(i)
             if self.lines[i]=="\tEVENTS":
                 endindices.append(i)
-
+            if "PARTDATA" in lines[i]:
+                print(lines[i+2])
+                partdata.append([lines[i+2],lines[i+3],lines[i+4],lines[i+5]])
+               
         for i in range(len(startindices)):
-            self.partslist.append(part(self.lines[startindices[i]:endindices[i]]))
+            self.partslist.append(part(self.lines[startindices[i]:endindices[i]],partdata[i]))
 
 
 
 class part:
     """A part for a ship lol"""
-    def __init__(self,lines):
+    def __init__(self,lines,partdata):
         self.lines = lines
+        self.partdata = partdata
         self.part = None
         self.partNumber = None
         self.partName = None
@@ -403,14 +409,18 @@ class part:
         self.modCost = None
         self.modMass = None
         self.modSize = None
+        self.tgt = 0
+        self.tgtpos = 0
+        self.tgtrot = 0
+        self.tgtdir = 0
         self.linklist = []
         self.attNlist = []
         self.symlist = []
         self.srfNlist = []
 
-        self.set_data(self.lines)
+        self.set_data(self.lines,self.partdata)
 
-    def set_data(self,lines):
+    def set_data(self,lines,partdata):
         """set part data based on first word of each line"""
         for line in lines:
             if line.split()[0] == "part":
@@ -460,7 +470,16 @@ class part:
                 self.symlist.append(sym(line))                                  #new entry in symmetrical parts list with new sym instance
             if line.split()[0] == "srfN":
                 self.srfNlist.append(srfN(line))                                #"srfN = srfAttach,RCSTank1-2_4293083910" -> new entry in surface-attached-to list with new srfN instance
-
+        
+        for line in partdata:
+            if line.split()[0] == "tgt":
+                self.tgt = line.split()[-1]
+            if line.split()[0] == "pos":
+                self.tgtpos = zup_tuple(line)
+            if line.split()[0] == "rot":
+                self.tgtrot = zup_quat(line)
+            if line.split()[0] == "dir":
+                self.tgtdir = zup_tuple(line)
 
 class link:
     """A link for a part for a ship lol"""
@@ -632,6 +651,11 @@ def import_parts(craft,ksp,right_scale):
                 #newpart["attNlist"] = part.attNlist
                 #newpart["symlist"] = part.symlist
                 #newpart["srfNlist"] = part.srfNlist ### FIX THESE
+                newpart["tgt"] = part.tgt
+                newpart["tgtpos"] = part.tgtpos
+                newpart["tgtrot"] = part.tgtrot
+                newpart["tgtdir"] = part.tgtdir
+                print(part.tgtpos)
                 
                 
             else:                                                                                           # but if part has been imported...
@@ -649,6 +673,12 @@ def import_parts(craft,ksp,right_scale):
                 print(oldpart)
                 bpy.ops.object.select_grouped(type = 'CHILDREN_RECURSIVE')                                      # select all children of the parent object (the empty), which deselects the parent
                 bpy.data.objects[doneparts[part.partName]].select = True                                        # so reselect the parent
+                
+                for child in bpy.data.objects[doneparts[part.partName]].children[0].children:
+                    if "newstrut" in child.name:
+                        child.select = False
+                    if "newfuelline" in child.name:
+                        child.select = False
                 
                 bpy.ops.object.duplicate_move_linked()                                                          # duplicate the whole family
                 copiedpart = oldpart.name + ".001"                                                             # the duplicate will be called something.001 always
@@ -678,13 +708,13 @@ def import_parts(craft,ksp,right_scale):
         emptysize = []
                 
         if partdir[part.partName][1] == "strut":
-            add_strut(part)
+            add_strut(part,objlist)
             
         elif partdir[part.partName][1] == "fuelline":
-            add_fuelline(part)
+            add_fuelline(part,objlist)
             
         elif partdir[part.partName][1] == "launchclamp":
-            add_launchclamp(part)
+            add_launchclamp(part,objlist)
                     
         else:    
             for obj in objlist:                                                                                 # for all the unprocesses objects
@@ -724,7 +754,7 @@ def import_parts(craft,ksp,right_scale):
                     meshrad = math.sqrt((obj.dimensions[0]/2)**2 + (obj.dimensions[1]/2)**2 + (obj.dimensions[2]/2)**2)  # find the radius of the parent Empty such that it encloses the object
                     emptysize.append(meshrad)
                     
-                if "coll" in obj.name or "COL" in obj.name or "fair" in obj.name or "onj_strut" in obj.name and 'KSP' not in obj.name:         # if it is named anything to do with collider, I'll have none of it
+                if "coll" in obj.name or "COL" in obj.name or "fair" in obj.name and 'KSP' not in obj.name:         # if it is named anything to do with collider, I'll have none of it
                     obj.hide = True                                                                                     # gtfo
                     obj.hide_render = True                                                                              # really gtfo (don't even render)
                     #object.select = True                                                                               # and if I'm really mad
@@ -781,25 +811,152 @@ def fairing_fixer(partslist):
                             queue.append(child)
                             
                     
-def add_strut(part):     
+def add_strut(part,objlist):     
+    scn = bpy.context.scene
+    
     root = bpy.data.objects[part.part]
+    root.children[0].hide = True
     for child in root.children[0].children:
         if "anchor" in child.name:
             anchor = child
         if "target" in child.name:
             target = child
-    print(root.location)
-    print(root.rotation_quaternion)
     anchor.delta_location = mathutils.Vector(part.attPos)
     anchor.delta_rotation_quaternion = mathutils.Quaternion(part.attRot)
-    target.location = mathutils.Vector(part.attPos0)
-    target.delta_rotation_quaternion = mathutils.Quaternion(part.attRot0)
+    target.location = mathutils.Vector(part.tgtpos)
+    target.rotation_quaternion = mathutils.Quaternion(part.tgtrot)
+    
+    for obj in objlist:
+        if obj.type == 'MESH':
+            scn.objects.active = obj 
+            if obj.data.materials:
+                materialfixer(obj,part)
+                
+            bpy.ops.object.mode_set(mode='EDIT')                                                                # go into edit mode
+            bpy.ops.mesh.remove_doubles(threshold = 0.0001)                                                     # remove double vertices
+            bpy.ops.mesh.normals_make_consistent(inside = False)                                                # fix normals
+            bpy.ops.object.mode_set(mode='OBJECT')                                                              # leave edit mode
+            
+            obj.select = True
+            bpy.ops.object.shade_smooth()
+            obj.data.use_auto_smooth = True
+            obj.data.auto_smooth_angle = .610865
+            bpy.ops.object.select_all(action = 'DESELECT')
+            
+        if obj.parent == None:
+            obj.empty_draw_type = 'SPHERE'
+            obj.empty_draw_size = .25
+        if "coll" in obj.name or "obj_strut" in obj.name:
+            if obj.type == 'MESH' and obj.data.materials:
+                strutmat = obj.data.materials[0]
+            obj.hide = True
+            obj.hide_render = True
+    
+    target.children[0].data.materials[0] = strutmat
+    
+    strutrotx = anchor.rotation_euler[0]+part.tgtdir[0]
+    strutroty = -anchor.rotation_euler[1]+part.tgtdir[1]
+    strutrotz = anchor.rotation_euler[2]+part.tgtdir[2]
+    #strutrotx = 0
+    strutrot = mathutils.Vector((strutrotx,strutroty,strutrotz))
+    bpy.ops.mesh.primitive_circle_add(vertices=8, radius=.04, fill_type='NGON', view_align=False, enter_editmode=True, location=anchor.location, rotation=strutrot, layers=(True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False))
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.mesh.primitive_circle_add(vertices=8, radius=.04, fill_type='NGON', view_align=False, enter_editmode=True, location=target.location, rotation=strutrot, layers=(True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False))
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.mesh.bridge_edge_loops()
+    bpy.ops.transform.resize(value=(1, 0.5, 1), constraint_axis=(False, True, False), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
+
+    bpy.ops.object.editmode_toggle()
+   
+    newstrut = bpy.data.objects['Circle']
+    scn.objects.active = newstrut
+    newstrut.name = "newstrut_"+str(part.partNumber)
+    newstrut.parent = root.children[0]
+    bpy.ops.object.material_slot_add()
+    newstrut.data.materials[0] = strutmat
+    gl0 = strutmat.node_tree.nodes['Glossy BSDF']
+    
+    for link in strutmat.node_tree.links:
+        if link.to_node == gl0:
+            strutmat.node_tree.links.remove(link)
+    
+    co0 = strutmat.node_tree.nodes.new('ShaderNodeRGB')
+    co0.location = (800,150)
+    strutmat.node_tree.nodes["RGB"].outputs[0].default_value = (0.3, 0.3, 0.3, 1)
+    strutmat.node_tree.links.new(co0.outputs['Color'],gl0.inputs['Color'])
+    gl0.inputs[1].default_value=.1
+
+            
     
     
-def add_fuelline(part):     
-    print(1)
+def add_fuelline(part,objlist):     
+    scn = bpy.context.scene
     
-def add_launchclamp(part):   
+    root = bpy.data.objects[part.part]
+    root.children[0].hide = True
+    for child in root.children[0].children:
+        if "anchor" in child.name:
+            anchor = child
+        if "target" in child.name:
+            target = child
+        if "line" in child.name:
+            bpy.ops.object.select_all(action = 'DESELECT')
+            newfuelline = child.children[0]
+            newfuelline.select = True
+            scn.objects.active = newfuelline
+            bpy.ops.object.make_single_user(type='SELECTED_OBJECTS', object=True, obdata=True, material=False, texture=False, animation=False)
+            bpy.ops.object.select_all(action = 'DESELECT')
+
+    anchor.delta_location = mathutils.Vector(part.attPos)
+    anchor.delta_rotation_quaternion = mathutils.Quaternion(part.attRot)
+    target.location = mathutils.Vector(part.tgtpos)
+    target.rotation_quaternion = mathutils.Quaternion(part.tgtrot)
+    
+    for obj in objlist:
+        if obj.type == 'MESH':
+            scn.objects.active = obj 
+            if obj.data.materials:
+                materialfixer(obj,part)
+                
+            bpy.ops.object.mode_set(mode='EDIT')                                                                # go into edit mode
+            bpy.ops.mesh.remove_doubles(threshold = 0.0001)                                                     # remove double vertices
+            bpy.ops.mesh.normals_make_consistent(inside = False)                                                # fix normals
+            bpy.ops.object.mode_set(mode='OBJECT')                                                              # leave edit mode
+            
+            obj.select = True
+            bpy.ops.object.shade_smooth()
+            obj.data.use_auto_smooth = True
+            obj.data.auto_smooth_angle = .610865
+            bpy.ops.object.select_all(action = 'DESELECT')
+            
+        if obj.parent == None:
+            obj.empty_draw_type = 'SPHERE'
+            obj.empty_draw_size = .25
+        if "coll" in obj.name:
+            if obj.type == 'MESH' and obj.data.materials:
+                strutmat = obj.data.materials[0]
+            obj.hide = True
+            obj.hide_render = True
+        if "Cap" in obj.name and obj.type == 'EMPTY':
+            obj.hide = True
+    
+    fuellen = (anchor.location - target.location).length * 10
+    newfuelline.data.vertices[5].co.y = fuellen
+    newfuelline.data.vertices[6].co.y = fuellen
+    newfuelline.data.vertices[7].co.y = fuellen
+    newfuelline.data.vertices[8].co.y = fuellen
+    newfuelline.data.vertices[9].co.y = fuellen
+    newfuelline.parent.rotation_quaternion = mathutils.Vector((1,0,0,-1))
+    #newfuelline.parent.delta_rotation_quaternion = -mathutils.Quaternion(part.attRot0)
+    newfuelline.parent.rotation_mode = 'XYZ'
+    newfuelline.parent.delta_rotation_euler = mathutils.Vector((math.pi/2,.95*math.asin((target.location[2]-anchor.location[2])/((anchor.location-target.location).magnitude)),0.05))
+    #newfuelline.parent.delta_rotation_euler = mathutils.Vector((0,math.asin((target.location[2]-anchor.location[2])/((anchor.location-target.location).magnitude)),0))
+    
+    #newfuelline.parent.delta_rotation_euler = mathutils.Quaternion(part.attRot0).to_euler()
+    #newfuelline.parent.rotation_mode = 'QUATERNION'
+    #newfuelline.parent.delta_rotation_euler = mathutils.Vector((0,0,math.asin((target.location[0]-anchor.location[0])/((target.location-anchor.location).length))))
+    
+def add_launchclamp(part,objlist):   
     print(1)                 
 
 def materialfixer(obj,part):
