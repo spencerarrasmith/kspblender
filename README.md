@@ -17,9 +17,9 @@ HOW TO USE DEMO:
 
 Change to Coding view
 
-Change line 20, the KSP.exe directory, to your own directory (be sure to use double backward slashes!!!)
+Change line 23, the KSP.exe directory, to your own directory (be sure to use double backward slashes!!!)
 
-Change line 786, the craft name, to be the name of that file
+Change line 1196, the craft name, to be the name of that file
 
 Change back to Default view
 
