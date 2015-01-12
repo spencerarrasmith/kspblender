@@ -1,5 +1,5 @@
-# KSPBlender 1.20
-# 1/11/15
+# KSPBlender 0.51
+# 1/12/15
 # Spencer Arrasmith
 
 #############################
@@ -9,9 +9,9 @@
 import os, string, time
 import bpy, mathutils, math
 #import materialfixer
-import scalefixer
-import materialpreserver
-os.chdir("C:\\Users\\Spencer.Satan-PC\\Art\\Projects\\ksp\\kspblender") # current working directory... need to have the .craft file in this same folder for now
+#import scalefixer
+#import materialpreserver
+os.chdir(bpy.path.abspath("//"))
 
 #FIGURE OUT A BETTER WAY TO MANAGE OPENING CONSOLE
 #bpy.ops.wm.console_toggle()
@@ -287,6 +287,10 @@ right_scale['standardNoseCone'] = mathutils.Vector((1.25,1.25,1.25))
 right_scale['liquidEngine2'] = mathutils.Vector((1.25,1.25,1.25))
 right_scale['science.module'] = mathutils.Vector((1.25,1.25,1.25))
 right_scale['fuelTank.long'] = mathutils.Vector((1.25,1.25,1.25))
+right_scale['Mk1Fuselage'] = mathutils.Vector((1.25,1.25,1.25))
+right_scale['turboFanEngine'] = mathutils.Vector((1.25,1.25,1.25))
+right_scale['CircularIntake'] = mathutils.Vector((-1.25,-1.25,-1.25))
+right_scale['winglet'] = mathutils.Vector((1.25,1.25,1.25))
 
 #############################
 ### INCORRECT TEXTURE ASSIGNMENTS
@@ -1173,12 +1177,22 @@ def materialfixer(obj,part):
                 print('Failed to find bump texture')
 
     
-    
+def scalefixer(craft,cursor_loc,scale):
+    scn = bpy.context.scene
+    for part in craft.partslist:
+        obj = bpy.data.objects[part.part]
+        scn.objects.active = obj
+        obj_loc = obj.location - cursor_loc
+        obj_sca = obj.scale
+        obj.location = (scale*obj_loc[0],scale*obj_loc[1],scale*obj_loc[2])
+        obj.scale = (scale*obj_sca[0],scale*obj_sca[1],scale*obj_sca[2])
+        
+    bpy.ops.transform.resize()    
 
-    
+     
 def main():
     """runs"""
-    mycraft = kspcraft('BON-3R Class Explorer Tylo Edition.craft')
+    mycraft = kspcraft('Podracer mk1.craft')
     print("\n")
     print("         A          ")
     print("        / \\        ")
@@ -1201,7 +1215,7 @@ def main():
     cursor_loc = get_cursor_location()
     import_parts(mycraft,kspexedirectory,right_scale)
     fairing_fixer(mycraft.partslist)
-    scalefixer.main(mycraft,cursor_loc,10)
+    scalefixer(mycraft,cursor_loc,10)
     print( "All done")
     return mycraft
 
