@@ -1,5 +1,5 @@
-# KSPBlender 1.16
-# 1/7/15
+# KSPBlender 1.20
+# 1/11/15
 # Spencer Arrasmith
 
 #############################
@@ -285,6 +285,8 @@ right_scale['fuelTankSmall'] = mathutils.Vector((1.25,1.25,1.25))
 right_scale['noseConeAdapter'] = mathutils.Vector((1.25,1.25,1.25))
 right_scale['standardNoseCone'] = mathutils.Vector((1.25,1.25,1.25))
 right_scale['liquidEngine2'] = mathutils.Vector((1.25,1.25,1.25))
+right_scale['science.module'] = mathutils.Vector((1.25,1.25,1.25))
+right_scale['fuelTank.long'] = mathutils.Vector((1.25,1.25,1.25))
 
 #############################
 ### INCORRECT TEXTURE ASSIGNMENTS
@@ -329,12 +331,12 @@ class kspcraft:
     """A Kerbal Space Program craft lol"""
     def __init__(self,filename):
         self.filename = filename
-        self.lines = None
-        self.ship = None
-        self.version = None
-        self.description = None
-        self.type = None
-        self.size = None
+        self.lines = []
+        self.ship = "0"
+        self.version = "0"
+        self.description = "0"
+        self.type = "0"
+        #self.size = None
         self.partslist = []
         self.partdatalist = []
 
@@ -362,7 +364,7 @@ class kspcraft:
         self.version = lines[1].split(" ")[2]
         self.description = " ".join(lines[2].split(" ")[2:])
         self.type = lines[3].split(" ")[2]
-        self.size = zup_tuple(lines[4])
+        #self.size = zup_tuple(lines[4])
 
     def set_partslist(self,lines):
         """find parts data by looking between each unindented { and the following \tEVENTS (\t is indentation)"""
@@ -377,6 +379,8 @@ class kspcraft:
             if "PARTDATA" in lines[i]:
                 print(lines[i+2])
                 partdata.append([lines[i+2],lines[i+3],lines[i+4],lines[i+5]])
+            else:
+                partdata.append("None")
                
         for i in range(len(startindices)):
             self.partslist.append(part(self.lines[startindices[i]:endindices[i]],partdata[i]))
@@ -388,31 +392,31 @@ class part:
     def __init__(self,lines,partdata):
         self.lines = lines
         self.partdata = partdata
-        self.part = None
-        self.partNumber = None
-        self.partName = None
-        self.partClass = None
-        self.pos = None
-        self.attPos = None
-        self.attPos0 = None
-        self.rot = None
-        self.attRot = None
-        self.attRot0 = None
-        self.rotQ = None
-        self.mir = None
-        self.symMethod = None
-        self.istg = None
-        self.dstg = None
-        self.sidx = None
-        self.sqor = None
-        self.attm = None
-        self.modCost = None
-        self.modMass = None
-        self.modSize = None
+        self.part = ""
+        self.partNumber = 0
+        self.partName = "0"
+        self.partClass = "0"
+        self.pos = (0,0,0)
+        self.attPos = (0,0,0)
+        self.attPos0 = (0,0,0)
+        self.rot = (0,0,0,0)
+        self.attRot = (0,0,0,0)
+        self.attRot0 = (0,0,0,0)
+        self.rotQ = (0,0,0,0)
+        self.mir = (0,0,0)
+        self.symMethod = "0"
+        self.istg = 0
+        self.dstg = 0
+        self.sidx = 0
+        self.sqor = 0
+        self.attm = 0
+        self.modCost = 0
+        self.modMass = 0
+        self.modSize = (0,0,0)
         self.tgt = 0
-        self.tgtpos = 0
-        self.tgtrot = 0
-        self.tgtdir = 0
+        self.tgtpos = (0,0,0)
+        self.tgtrot = (0,0,0,0)
+        self.tgtdir = (0,0,0)
         self.linklist = []
         self.attNlist = []
         self.symlist = []
@@ -470,7 +474,11 @@ class part:
                 self.symlist.append(sym(line))                                  #new entry in symmetrical parts list with new sym instance
             if line.split()[0] == "srfN":
                 self.srfNlist.append(srfN(line))                                #"srfN = srfAttach,RCSTank1-2_4293083910" -> new entry in surface-attached-to list with new srfN instance
-        
+            if line.split()[0] == "cData":
+                self.tgt = line.split()[3][0:-1]
+                self.tgtpos = zup_tuple(line.split()[5][0:-1])
+                self.tgtdir = zup_tuple(line.split()[7][0:-1])
+            
         for line in partdata:
             if line.split()[0] == "tgt":
                 self.tgt = line.split()[-1]
@@ -620,6 +628,8 @@ def import_parts(craft,ksp,right_scale):
     doneobj = set(bpy.data.objects)                                                                         # know which objects have gone through the cleaning process
     scn = bpy.context.scene                                                                                 # the active scene
     cursor_loc = get_cursor_location()
+    global to_ground
+    to_ground = partslist[0].pos[2]
     
     for part in partslist:
         if os.path.isfile(ksp+partdir[part.partName][0]):                                                      # make sure the part file exists so nothing crashes
@@ -673,12 +683,6 @@ def import_parts(craft,ksp,right_scale):
                 print(oldpart)
                 bpy.ops.object.select_grouped(type = 'CHILDREN_RECURSIVE')                                      # select all children of the parent object (the empty), which deselects the parent
                 bpy.data.objects[doneparts[part.partName]].select = True                                        # so reselect the parent
-                
-                for child in bpy.data.objects[doneparts[part.partName]].children[0].children:
-                    if "newstrut" in child.name:
-                        child.select = False
-                    if "newfuelline" in child.name:
-                        child.select = False
                 
                 bpy.ops.object.duplicate_move_linked()                                                          # duplicate the whole family
                 copiedpart = oldpart.name + ".001"                                                             # the duplicate will be called something.001 always
@@ -749,6 +753,7 @@ def import_parts(craft,ksp,right_scale):
                     
                     if len(obj.data.polygons) == 0:                                                                     # and if it's one of them stupid fake meshes with no faces
                         obj.hide = True                                                                                 # gtfo
+                        obj.hide_render = True
                     #maybe set unselectable here    
                     root = obj
                     meshrad = math.sqrt((obj.dimensions[0]/2)**2 + (obj.dimensions[1]/2)**2 + (obj.dimensions[2]/2)**2)  # find the radius of the parent Empty such that it encloses the object
@@ -771,7 +776,9 @@ def import_parts(craft,ksp,right_scale):
         if emptysize:
             radius = max(emptysize)
         else:
-            radius = 0.25
+            radius = bpy.context.active_object.empty_draw_size
+            if radius < .25:
+                radius = 0.25
         bpy.data.objects[part.part].empty_draw_size = radius
         
 
@@ -854,6 +861,12 @@ def add_strut(part,objlist):
     
     target.children[0].data.materials[0] = strutmat
     
+    for child in root.children[0].children:
+        if "newstrut" in child.name and ".0" in child.name:
+              scn.objects.active = child
+              child.select = True
+              bpy.ops.object.delete()
+    
     strutrotx = anchor.rotation_euler[0]+part.tgtdir[0]
     strutroty = -anchor.rotation_euler[1]+part.tgtdir[1]
     strutrotz = anchor.rotation_euler[2]+part.tgtdir[2]
@@ -933,8 +946,6 @@ def add_fuelline(part,objlist):
             obj.empty_draw_type = 'SPHERE'
             obj.empty_draw_size = .25
         if "coll" in obj.name:
-            if obj.type == 'MESH' and obj.data.materials:
-                strutmat = obj.data.materials[0]
             obj.hide = True
             obj.hide_render = True
         if "Cap" in obj.name and obj.type == 'EMPTY':
@@ -946,10 +957,14 @@ def add_fuelline(part,objlist):
     newfuelline.data.vertices[7].co.y = fuellen
     newfuelline.data.vertices[8].co.y = fuellen
     newfuelline.data.vertices[9].co.y = fuellen
-    newfuelline.parent.rotation_quaternion = mathutils.Vector((1,0,0,-1))
+    const = newfuelline.constraints.new("STRETCH_TO")
+    const.target = target
+    const.bulge = 0
+    
+    #newfuelline.parent.rotation_quaternion = mathutils.Vector((1,0,0,-1))
     #newfuelline.parent.delta_rotation_quaternion = -mathutils.Quaternion(part.attRot0)
-    newfuelline.parent.rotation_mode = 'XYZ'
-    newfuelline.parent.delta_rotation_euler = mathutils.Vector((math.pi/2,.95*math.asin((target.location[2]-anchor.location[2])/((anchor.location-target.location).magnitude)),0.05))
+    #newfuelline.parent.rotation_mode = 'XYZ'
+    #newfuelline.parent.delta_rotation_euler = mathutils.Vector((math.pi/2,.95*math.asin((target.location[2]-anchor.location[2])/((anchor.location-target.location).magnitude)),0.05))
     #newfuelline.parent.delta_rotation_euler = mathutils.Vector((0,math.asin((target.location[2]-anchor.location[2])/((anchor.location-target.location).magnitude)),0))
     
     #newfuelline.parent.delta_rotation_euler = mathutils.Quaternion(part.attRot0).to_euler()
@@ -957,8 +972,96 @@ def add_fuelline(part,objlist):
     #newfuelline.parent.delta_rotation_euler = mathutils.Vector((0,0,math.asin((target.location[0]-anchor.location[0])/((target.location-anchor.location).length))))
     
 def add_launchclamp(part,objlist):   
-    print(1)                 
+    scn = bpy.context.scene
+    global to_ground
+    root = bpy.data.objects[part.part]
+    print(to_ground)
 
+    mat = root.matrix_local
+    
+    for child in root.children[0].children:
+        if "girder" in child.name:
+            girder = child
+            bpy.ops.object.select_all(action = 'DESELECT')
+            newgirder = child.children[0].children[0]
+            newgirder.select = True
+            scn.objects.active = newgirder
+            bpy.ops.object.make_single_user(type='SELECTED_OBJECTS', object=True, obdata=True, material=False, texture=False, animation=False)
+            bpy.ops.object.select_all(action = 'DESELECT')   
+        if "ground" in child.name:
+            ground = child
+            ground.parent = girder
+            bpy.ops.object.select_all(action = 'DESELECT')
+            scn.objects.active = ground
+            ground.select = True
+            const = ground.constraints.new("LIMIT_LOCATION")
+            const.use_min_z  = True
+            const.use_max_z  = True
+            const.min_z  = 5
+            const.max_z  = 5
+            bpy.ops.object.select_all(action = 'DESELECT')
+            ground.location = (ground.location[0],ground.location[1],-mat.to_translation()[2]-ground.location[2])
+            ground.delta_location = (0,.94,0)      
+
+    girder.rotation_mode = 'XYZ'
+    mate = mat.to_euler()
+    girder.rotation_euler = mathutils.Vector((-mate[0],0,mate[1]))
+    
+    #bpy.ops.object.select_all(action = 'DESELECT')
+    #newroot = root.children[0]
+    #scn.objects.active = newroot
+    #newroot.select = True
+    #bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
+    #bpy.ops.object.select_all(action = 'DESELECT')
+    
+    #FIX EVENTUALLY... CONTROL EMPTY IS OFF SOMEWHERE RANDOM
+   
+    #rootname = root.name
+    #root.name = "oldroot"
+    #newroot.name = rootname
+    #root.parent = newroot
+    #root.hide = True
+    
+    for obj in objlist:
+        if obj.type == 'MESH':
+            scn.objects.active = obj 
+            if obj.data.materials:
+                materialfixer(obj,part)
+              
+            bpy.ops.object.mode_set(mode='EDIT')                                                                # go into edit mode
+            bpy.ops.mesh.remove_doubles(threshold = 0.0001)                                                     # remove double vertices
+            bpy.ops.mesh.normals_make_consistent(inside = False)                                                # fix normals
+            bpy.ops.object.mode_set(mode='OBJECT')                                                              # leave edit mode
+            
+            obj.select = True
+            bpy.ops.object.shade_smooth()
+            obj.data.use_auto_smooth = True
+            obj.data.auto_smooth_angle = .610865
+            bpy.ops.object.select_all(action = 'DESELECT')
+            
+            if len(obj.data.polygons) == 0:
+                obj.hide = True
+                obj.hide_render = True  
+            
+        if obj.type == 'EMPTY':
+            if obj.parent == None:
+                obj.empty_draw_type = 'SPHERE'
+                obj.empty_draw_size = 1
+            else:
+                obj.hide = True
+        if "coll" in obj.name:
+            if obj.type == 'MESH' and obj.data.materials:
+                strutmat = obj.data.materials[0]
+            obj.hide = True
+            obj.hide_render = True
+        if "Cap" in obj.name and obj.type == 'EMPTY':
+            obj.hide = True
+            
+    verts = [0,3,4,8,9,10,11,12,13,14,15,25,26,28,29,31]
+    for vert in verts:
+        newgirder.data.vertices[vert].co.y = -mat.to_translation()[2]
+    #ground.delta_location = mathutils.Vector((0,0,-1))
+    
 def materialfixer(obj,part):
     
     #kill preexisting at some point
@@ -1075,7 +1178,7 @@ def materialfixer(obj,part):
     
 def main():
     """runs"""
-    mycraft = kspcraft('ADAPTIVEPARTS.craft')
+    mycraft = kspcraft('BON-3R Class Explorer Tylo Edition.craft')
     print("\n")
     print("         A          ")
     print("        / \\        ")
@@ -1102,4 +1205,5 @@ def main():
     print( "All done")
     return mycraft
 
+to_ground = 0
 mycraft = main()
