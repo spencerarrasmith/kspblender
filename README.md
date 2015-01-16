@@ -11,15 +11,16 @@ HOW TO USE DEMO:
 1. Download Blender from http://blender.org
 2. Download .mu importer Blender addon from https://github.com/taniwha-qf/io_object_mu
 3. Extract, put "io\_object\_mu\_master" folder (the whole folder) in Program Files\Blender Foundation\Blender\2.72\scripts\addons
-4. Download kspblenderdemo.blend from this repository
-5. Place .craft file into the same folder as the Blender file (they can be found under "saves" in the KSP.exe folder)
-6. Follow these setup instructions: http://imgur.com/a/oTjPT
+4. Enable the addon in Blender. Press Ctrl+Alt+U or go to User Preferences under File. Go to the Addons tab, search for "mu" and enable the addon by clicking the little checkbox
+5. Download kspblenderdemo.blend from this repository
+6. Place .craft file into the same folder as the Blender file (they can be found under "saves" in the KSP.exe folder)
+7. Follow these setup instructions: http://imgur.com/a/oTjPT
 
 Change to Coding view
 
-Change line 20, the KSP.exe directory, to your own directory (be sure to use double backward slashes!!!)
+Change line 23, the KSP.exe directory, to your own directory (be sure to use double backward slashes!!!)
 
-Change line 786, the craft name, to be the name of that file
+Change line 1196, the craft name, to be the name of that file
 
 Change back to Default view
 
