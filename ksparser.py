@@ -391,21 +391,18 @@ class kspcraft:
             partdata.append(["None"])
             if self.lines[i]=="{":
                 startindices.append(i)
-            if self.lines[i]=="\tEVENTS":
+            if self.lines[i]=="}":
                 endindices.append(i)
-            if "PARTDATA" in lines[i]:
-                partdata[i] = [lines[i+2],lines[i+3],lines[i+4],lines[i+5]]
                
         for i in range(len(startindices)):
-            self.partslist.append(part(self.lines[startindices[i]:endindices[i]],partdata[i]))
+            self.partslist.append(part(self.lines[startindices[i]:endindices[i]]))
 
 
 
 class part:
     """A part for a ship lol"""
-    def __init__(self,lines,partdata):
+    def __init__(self,lines):
         self.lines = lines
-        self.partData = partdata
         self.part = ""
         self.partNumber = 0
         self.partName = "0"
@@ -413,7 +410,7 @@ class part:
         self.pos = (0,0,0)
         self.attPos = (0,0,0)
         self.attPos0 = (0,0,0)
-        self.rot = (0,0,0,0)
+        self.rot = (0,0,0)
         self.attRot = (0,0,0,0)
         self.attRot0 = (0,0,0,0)
         self.rotQ = (0,0,0,0)
@@ -436,9 +433,9 @@ class part:
         self.symlist = []
         self.srfNlist = []
 
-        self.set_data(self.lines,self.partData)
+        self.set_data(self.lines)
 
-    def set_data(self,lines,partdata):
+    def set_data(self,lines):
         """set part data based on first word of each line"""
         for line in lines:
             if line.split()[0] == "part":
@@ -447,13 +444,13 @@ class part:
                 self.partName = "".join(line.split("_")[0:-1]).split()[-1]      #"part = Mark1-2Pod_4293084140" -> "Mark1-2Pod" for mesh name
             #if line.split()[0] == "partName":
                 #self.partName = " ".join(line.split()[2:])                     #"partName = Part" -> seems to always be Part, so kinda useless
-            if line.split()[0] == "pos":
+            if line.split()[0] == "pos" and self.pos == (0,0,0):
                 self.pos = zup_tuple(line)                                      #"pos = 0.003080267,7.645381,0.02017996" -> (0.003080267, 0.02017996, 7.645381)
             if line.split()[0] == "attPos":
                 self.attPos = zup_tuple(line)                                   #"attPos = 0,0,0" -> (0,0,0) y<>z, attachment position? always seems to be (0,0,0)
             if line.split()[0] == "attPos0":
                 self.attPos0 = zup_tuple(line)                                  #"attPos0 = 0,0,0" -> (0,0,0) y<>z, seems to always be (0,0,0) also
-            if line.split()[0] == "rot":
+            if line.split()[0] == "rot" and self.rot == (0,0,0):
                 self.rot = zup_eul(line)                                        #"rot = 0,0,0,1" -> (0,0,0) y<>z, made right-handed, converted to Euler angles
                 self.rotQ = zup_quat(line)                                      #"rot = 0,0,0,1" -> (-1,0,0,0) w to beginning, y<>z, made right-handed
             if line.split()[0] == "attRot":
@@ -492,13 +489,11 @@ class part:
                 self.tgt = line.split()[3][0:-1]
                 self.tgtpos = zup_tuple(line.split()[5][0:-1])
                 self.tgtdir = zup_tuple(line.split()[7][0:-1])
-            
-        for line in partdata:
             if line.split()[0] == "tgt":
                 self.tgt = line.split()[-1]
-            if line.split()[0] == "pos":
+            if line.split()[0] == "pos" and self.pos != (0,0,0):
                 self.tgtpos = zup_tuple(line)
-            if line.split()[0] == "rot":
+            if line.split()[0] == "rot" and self.rot != (0,0,0):
                 self.tgtrot = zup_quat(line)
             if line.split()[0] == "dir":
                 self.tgtdir = zup_tuple(line)
@@ -651,7 +646,6 @@ def import_parts(craft):
     for part in partslist:
         if os.path.isfile(ksp+partdir[part.partName][0]):                                                      # make sure the part file exists so nothing crashes
             print("\n----------------------------------------------------\n")                               # to make console output easier to look at
-            print(part.partData)
             if part.partName not in doneparts:                                                              # if part has not been imported...
                 print("Importing "+part.partName+" as "+part.part)                                                               # ...say so on the console
                 bpy.ops.import_object.ksp_mu(filepath=ksp+partdir[part.partName][0])                               # call the importer
@@ -946,13 +940,69 @@ def add_strut(part,objlist):
             scn.objects.active = newstrut
             bpy.ops.object.make_single_user(type='SELECTED_OBJECTS', object=True, obdata=True, material=False, texture=False, animation=False)
             bpy.ops.object.select_all(action = 'DESELECT')
-            
+     
+    if newstrut.constraints:
+        scn.objects.active = newstrut
+        newstrut.constraints.clear()
+        const = newstrut.constraints.new("STRETCH_TO")
+    else:
+        const = newstrut.constraints.new("STRETCH_TO")
+    const.target = target
+    const.bulge = 0
+           
     anchor.delta_location = mathutils.Vector(part.attPos)
     anchor.delta_rotation_quaternion = mathutils.Quaternion(part.attRot)
     target.location = mathutils.Vector(part.tgtpos)
     target.rotation_quaternion = mathutils.Quaternion(part.tgtrot)
     
-     
+    for obj in objlist:
+        if obj.type == 'MESH':
+            scn.objects.active = obj 
+            if obj.data.materials:
+                materialfixer(obj,part)
+                
+            bpy.ops.object.mode_set(mode='EDIT')                                                                # go into edit mode
+            bpy.ops.mesh.remove_doubles(threshold = 0.0001)                                                     # remove double vertices
+            bpy.ops.mesh.normals_make_consistent(inside = False)                                                # fix normals
+            bpy.ops.object.mode_set(mode='OBJECT')                                                              # leave edit mode
+            
+            obj.select = True
+            bpy.ops.object.shade_smooth()
+            obj.data.use_auto_smooth = True
+            obj.data.auto_smooth_angle = .610865
+            bpy.ops.object.select_all(action = 'DESELECT')
+            
+        if obj.parent == None:
+            obj.empty_draw_type = 'SPHERE'
+            obj.empty_draw_size = .25
+        if "coll" in obj.name:
+            obj.hide = True
+            obj.hide_render = True
+        if "obj_strut" in obj.name and obj.type == 'MESH' and obj.data.materials:
+            strutmat = obj.data.materials[0]
+
+    strutlen = (anchor.location - target.location).magnitude*10
+    print(strutlen)
+    newstrut.data.vertices[1].co.y = strutlen
+    print(newstrut.data.vertices[1].co.y)
+    newstrut.data.vertices[5].co.y = strutlen
+    newstrut.data.vertices[6].co.y = strutlen
+    newstrut.data.vertices[7].co.y = strutlen
+    
+    target.children[0].data.materials[0] = strutmat
+    
+    gl0 = strutmat.node_tree.nodes['Glossy BSDF']
+    
+    for link in strutmat.node_tree.links:
+        if link.to_node == gl0:
+            strutmat.node_tree.links.remove(link)
+    
+    co0 = strutmat.node_tree.nodes.new('ShaderNodeRGB')
+    co0.location = (800,150)
+    strutmat.node_tree.nodes["RGB"].outputs[0].default_value = (0.3, 0.3, 0.3, 1)
+    strutmat.node_tree.links.new(co0.outputs['Color'],gl0.inputs['Color'])
+    gl0.inputs[1].default_value=.2
+    
     
 def add_fuelline(part,objlist):     
     scn = bpy.context.scene
@@ -973,6 +1023,15 @@ def add_fuelline(part,objlist):
             scn.objects.active = newfuelline
             bpy.ops.object.make_single_user(type='SELECTED_OBJECTS', object=True, obdata=True, material=False, texture=False, animation=False)
             bpy.ops.object.select_all(action = 'DESELECT')
+
+    if newfuelline.constraints:
+        scn.objects.active = newfuelline
+        newfuelline.constraints.clear()
+        const = newfuelline.constraints.new("STRETCH_TO")
+    else:
+        const = newfuelline.constraints.new("STRETCH_TO")
+    const.target = target
+    const.bulge = 0  
 
     anchor.delta_location = mathutils.Vector(part.attPos)
     anchor.delta_rotation_quaternion = mathutils.Quaternion(part.attRot)
@@ -1005,18 +1064,13 @@ def add_fuelline(part,objlist):
         if "Cap" in obj.name and obj.type == 'EMPTY':
             obj.hide = True
     
-    fuellen = (anchor.location - target.location).length * 10
+    fuellen = (target.location - anchor.location).magnitude*10
     newfuelline.data.vertices[5].co.y = fuellen
     newfuelline.data.vertices[6].co.y = fuellen
     newfuelline.data.vertices[7].co.y = fuellen
     newfuelline.data.vertices[8].co.y = fuellen
     newfuelline.data.vertices[9].co.y = fuellen
-    if newfuelline.constraints:
-        const = newfuelline.constraints[0]
-    else:
-        const = newfuelline.constraints.new("STRETCH_TO")
-    const.target = target.children[1]
-    const.bulge = 0
+   
     
     #newfuelline.parent.rotation_quaternion = mathutils.Vector((1,0,0,-1))
     #newfuelline.parent.delta_rotation_quaternion = -mathutils.Quaternion(part.attRot0)
