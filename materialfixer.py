@@ -1,6 +1,6 @@
-import bpy
+import bpy, time
 
-def main(obj,partpart):
+def main(obj,part):
     
     #kill preexisting at some point
     
@@ -13,7 +13,7 @@ def main(obj,partpart):
     if "Material Output" in mat.node_tree.nodes:
         return
     
-    mat.name = partpart+"_"+obj.name
+    mat.name = part.part+"_"+obj.name
     
     tx0 = mat.node_tree.nodes.new('ShaderNodeTexCoord')
     im0 = mat.node_tree.nodes.new('ShaderNodeTexImage')
@@ -33,10 +33,26 @@ def main(obj,partpart):
     for node in mat.node_tree.nodes.keys():
         if "mainTex" in node:
             imA = mat.node_tree.nodes[node]
-            im0.image = bpy.data.images[imA.texture.name]
-            newname = partpart+"_"+obj.name+"_tex"
-            print(bpy.data.images[imA.texture.name].name)
-            bpy.data.images[imA.texture.name].name = newname
+            #print(imA.name)
+            texname = part.part+"_"+obj.name+"_tex"
+            #print(imA.texture.image.name)
+            #print(texname)
+            imgname = part.part+"_"+obj.name+"_img"
+            #print(imgname)
+            #time.sleep(3)
+            im0.image = imA.texture.image
+            imA.texture.use_alpha = False
+            #im0.image.use_alpha = False #maybe only certain parts, let's see
+            imA.texture.name = texname
+            #im0.image.name = imgname
+            #im0.image.name = newname
+        #if "bumpMap" in node:
+            #im1 = mat.node_tree.nodes.new('ShaderNodeTexImage')
+            #im1.location = (800,200)
+            #imB = mat.node_tree.nodes[node]
+            #im1.image = bpy.data.images[imB.texture.name]
+            #newname = part.part+"_"+obj.name+"_bump"
+            #bpy.data.images[imB.texture.name].name = newname
     
     
     ma0.location = location[2]

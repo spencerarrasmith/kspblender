@@ -1,5 +1,5 @@
-# KSPBlender 0.51
-# 1/12/15
+# KSPBlender 0.5
+# 1/11/15
 # Spencer Arrasmith
 
 #############################
@@ -280,17 +280,29 @@ def partdirectory():
 
 right_scale = {}
 right_scale['Mark1Cockpit'] = mathutils.Vector((1.25,1.25,1.25))
+right_scale['Mark2Cockpit'] = mathutils.Vector((1.25,1.25,1.25))
 right_scale['fuelTank'] = mathutils.Vector((1.25,1.25,1.25))
 right_scale['fuelTankSmall'] = mathutils.Vector((1.25,1.25,1.25))
 right_scale['noseConeAdapter'] = mathutils.Vector((1.25,1.25,1.25))
 right_scale['standardNoseCone'] = mathutils.Vector((1.25,1.25,1.25))
+right_scale['liquidEngine'] = mathutils.Vector((1.25,1.25,1.25))
 right_scale['liquidEngine2'] = mathutils.Vector((1.25,1.25,1.25))
 right_scale['science.module'] = mathutils.Vector((1.25,1.25,1.25))
 right_scale['fuelTank.long'] = mathutils.Vector((1.25,1.25,1.25))
-right_scale['Mk1Fuselage'] = mathutils.Vector((1.25,1.25,1.25))
+right_scale['MK1Fuselage'] = mathutils.Vector((1.25,1.25,1.25))
+right_scale['MK1FuselageStructural'] = mathutils.Vector((1.25,1.25,1.25))
+right_scale['MK1IntakeFuselage'] = mathutils.Vector((1.25,1.25,1.25))
+right_scale['nacelleBody'] = mathutils.Vector((1.25,1.25,1.25))
+right_scale['radialEngineBody'] = mathutils.Vector((1.25,1.25,1.25))
 right_scale['turboFanEngine'] = mathutils.Vector((1.25,1.25,1.25))
-right_scale['CircularIntake'] = mathutils.Vector((-1.25,-1.25,-1.25))
+right_scale['CircularIntake'] = mathutils.Vector((1.25,1.25,1.25))
+right_scale['toroidalAerospike'] = mathutils.Vector((1.25,1.25,1.25))
+right_scale['ramAirIntake'] = mathutils.Vector((1.25,1.25,1.25))
+right_scale['JetEngine'] = mathutils.Vector((1.25,1.25,1.25))
+right_scale['RAPIER'] = mathutils.Vector((1.25,1.25,1.25))
 right_scale['winglet'] = mathutils.Vector((1.25,1.25,1.25))
+right_scale['R8winglet'] = mathutils.Vector((1.25,1.25,1.25))
+right_scale['solidBooster'] = mathutils.Vector((1.25,1.25,1.25))
 
 #############################
 ### INCORRECT TEXTURE ASSIGNMENTS
@@ -624,9 +636,12 @@ def import_parts_old(partslist,ksp):
                 print(object.name + " Hidden")
 
 
-def import_parts(craft,ksp,right_scale):
+def import_parts(craft):
     """Imports parts from the ksp directory"""
     
+    global kspexedirectory
+    ksp = kspexedirectory
+    global right_scale
     partslist = craft.partslist
     doneparts = {}                                                                                          # keep track of parts that have already been imported so I can save time
     doneobj = set(bpy.data.objects)                                                                         # know which objects have gone through the cleaning process
@@ -640,12 +655,25 @@ def import_parts(craft,ksp,right_scale):
             print("\n----------------------------------------------------\n")                               # to make console output easier to look at
             if part.partName not in doneparts:                                                              # if part has not been imported...
                 print("Importing "+part.partName+" as "+part.part)                                                               # ...say so on the console
-                print("\n")
                 bpy.ops.import_object.ksp_mu(filepath=ksp+partdir[part.partName][0])                               # call the importer
                 newpart = bpy.context.active_object                                                             # set the imported part object to active. from here on, part refers to the part data structure and object to the blender object
+                newpart.select = True
                 newpart.name = part.part                                                                        # rename the object according to the part name (including the number)
                 newpart.location = mathutils.Vector(part.pos)+cursor_loc                                                          # move the object
                 newpart.rotation_quaternion = part.rotQ                                                         # rotate the object
+                if part.partName in right_scale:
+                    newpart.select = True
+                    newpart.scale = right_scale[part.partName]
+                    bpy.ops.object.transform_apply(location = False, rotation = False, scale = True)
+                    print("Scale corrected")
+                
+                #setup to make lod parts
+                #meme = bpy.data.meshes.new(part.partName+"_low")
+                #objobj = bpy.data.objects.new(part.partName+"_low",meme)
+                #objobj.location = newpart.location
+                #scn.objects.link(objobj)
+                
+                print("\n")
                 
                 # Set a bunch of properties
                 newpart["partName"] = part.partName
@@ -703,9 +731,6 @@ def import_parts(craft,ksp,right_scale):
         
         else:
             print("Failed to load "+part.partName+"... gotta fix that\n")                                   # if the part doesn't exist, let me know
-
-        if part.partName in right_scale and part.partName not in doneparts:
-            scaling_fixer(part, right_scale)
         
         if part.partName not in doneparts:                                                                  # if the part hasn't been imported before...
             doneparts[part.partName] = part.part                                                            # ...it has now
@@ -763,7 +788,7 @@ def import_parts(craft,ksp,right_scale):
                     meshrad = math.sqrt((obj.dimensions[0]/2)**2 + (obj.dimensions[1]/2)**2 + (obj.dimensions[2]/2)**2)  # find the radius of the parent Empty such that it encloses the object
                     emptysize.append(meshrad)
                     
-                if "coll" in obj.name or "COL" in obj.name or "fair" in obj.name and 'KSP' not in obj.name:         # if it is named anything to do with collider, I'll have none of it
+                if "coll" in obj.name or "COL" in obj.name or "Col" in obj.name or "fair" in obj.name and 'KSP' not in obj.name:         # if it is named anything to do with collider, I'll have none of it
                     obj.hide = True                                                                                     # gtfo
                     obj.hide_render = True                                                                              # really gtfo (don't even render)
                     #object.select = True                                                                               # and if I'm really mad
@@ -784,7 +809,6 @@ def import_parts(craft,ksp,right_scale):
             if radius < .25:
                 radius = 0.25
         bpy.data.objects[part.part].empty_draw_size = radius
-        
 
     bpy.ops.object.select_all(action = 'DESELECT')
     print("\n----------------------------------------------------\n") 
@@ -822,7 +846,7 @@ def fairing_fixer(partslist):
                             queue.append(child)
                             
                     
-def add_strut(part,objlist):     
+def add_strut_weird(part,objlist):     
     scn = bpy.context.scene
     
     root = bpy.data.objects[part.part]
@@ -904,7 +928,22 @@ def add_strut(part,objlist):
     gl0.inputs[1].default_value=.1
 
             
+def add_strut(part,objlist):
+    scn = bpy.context.scene   
     
+    root = bpy.data.objects[part.part]
+    root.children[0].hide = True
+    for child in root.children[0].children:
+        if "anchor" in child.name:
+            anchor = child
+        if "target" in child.name:
+            target = child
+    anchor.delta_location = mathutils.Vector(part.attPos)
+    anchor.delta_rotation_quaternion = mathutils.Quaternion(part.attRot)
+    target.location = mathutils.Vector(part.tgtpos)
+    target.rotation_quaternion = mathutils.Quaternion(part.tgtrot)
+    
+     
     
 def add_fuelline(part,objlist):     
     scn = bpy.context.scene
@@ -916,6 +955,8 @@ def add_fuelline(part,objlist):
             anchor = child
         if "target" in child.name:
             target = child
+            target.empty_draw_type = 'SPHERE'
+            target.empty_draw_size = .25
         if "line" in child.name:
             bpy.ops.object.select_all(action = 'DESELECT')
             newfuelline = child.children[0]
@@ -961,8 +1002,11 @@ def add_fuelline(part,objlist):
     newfuelline.data.vertices[7].co.y = fuellen
     newfuelline.data.vertices[8].co.y = fuellen
     newfuelline.data.vertices[9].co.y = fuellen
-    const = newfuelline.constraints.new("STRETCH_TO")
-    const.target = target
+    if newfuelline.constraints:
+        const = newfuelline.constraints[0]
+    else:
+        const = newfuelline.constraints.new("STRETCH_TO")
+    const.target = target.children[1]
     const.bulge = 0
     
     #newfuelline.parent.rotation_quaternion = mathutils.Vector((1,0,0,-1))
@@ -1189,10 +1233,10 @@ def scalefixer(craft,cursor_loc,scale):
         
     bpy.ops.transform.resize()    
 
-     
+    
 def main():
     """runs"""
-    mycraft = kspcraft('Podracer mk1.craft')
+    mycraft = kspcraft('Podracer Mk1.craft')
     print("\n")
     print("         A          ")
     print("        / \\        ")
@@ -1213,7 +1257,7 @@ def main():
     print(str(mycraft.num_parts()) + ' parts found...')
     
     cursor_loc = get_cursor_location()
-    import_parts(mycraft,kspexedirectory,right_scale)
+    import_parts(mycraft)
     fairing_fixer(mycraft.partslist)
     scalefixer(mycraft,cursor_loc,10)
     print( "All done")
