@@ -635,12 +635,14 @@ def import_parts(craft):
     global kspexedirectory
     ksp = kspexedirectory
     global right_scale
+    global to_ground
+    
     partslist = craft.partslist
     doneparts = {}                                                                                          # keep track of parts that have already been imported so I can save time
     doneobj = set(bpy.data.objects)                                                                         # know which objects have gone through the cleaning process
     scn = bpy.context.scene                                                                                 # the active scene
     cursor_loc = get_cursor_location()
-    global to_ground
+
     to_ground = partslist[0].pos[2]
     
     for part in partslist:
@@ -1218,7 +1220,7 @@ def materialfixer(obj,part):
             texname = part.part+"_"+obj.name+"_tex"
             imgname = part.part+"_"+obj.name+"_img"
             possible_img = [image for image in bpy.data.images if imA.texture.name in image.name]
-
+            
             if imA.texture.image:  
                 im0.image = imA.texture.image
                 im0.image.name = imgname
@@ -1230,6 +1232,10 @@ def materialfixer(obj,part):
             else:
                 print('Failed to find image texture')
             
+            possible_tex = [tex for tex in bpy.data.textures if im0.image.name in tex.name]
+            if possible_tex:
+                imA.texture = possible_tex[-1]
+            imA.texture.name = texname
             imA.texture.use_alpha = False
             
         if node.label == "bumpMap":
@@ -1299,7 +1305,7 @@ def scalefixer(craft,cursor_loc,scale):
     
 def main():
     """runs"""
-    mycraft = kspcraft('ADAPTIVEPARTS.craft')
+    mycraft = kspcraft('Kerbal X.craft')
     print("\n")
     print("         A          ")
     print("        / \\        ")
@@ -1319,7 +1325,8 @@ def main():
     print(mycraft.ship + ' ready for takeoff\n')
     print(str(mycraft.num_parts()) + ' parts found...')
     
-    cursor_loc = get_cursor_location()
+    #cursor_loc = get_cursor_location()
+    cursor_loc = mathutils.Vector((0,0,0))
     import_parts(mycraft)
     fairing_fixer(mycraft.partslist)
     scalefixer(mycraft,cursor_loc,10)
