@@ -388,15 +388,13 @@ class kspcraft:
         endindices = []
         partdata = []
         for i in range(len(self.lines)):
+            partdata.append(["None"])
             if self.lines[i]=="{":
                 startindices.append(i)
             if self.lines[i]=="\tEVENTS":
                 endindices.append(i)
             if "PARTDATA" in lines[i]:
-                print(lines[i+2])
-                partdata.append([lines[i+2],lines[i+3],lines[i+4],lines[i+5]])
-            else:
-                partdata.append("None")
+                partdata[i] = [lines[i+2],lines[i+3],lines[i+4],lines[i+5]]
                
         for i in range(len(startindices)):
             self.partslist.append(part(self.lines[startindices[i]:endindices[i]],partdata[i]))
@@ -407,7 +405,7 @@ class part:
     """A part for a ship lol"""
     def __init__(self,lines,partdata):
         self.lines = lines
-        self.partdata = partdata
+        self.partData = partdata
         self.part = ""
         self.partNumber = 0
         self.partName = "0"
@@ -438,7 +436,7 @@ class part:
         self.symlist = []
         self.srfNlist = []
 
-        self.set_data(self.lines,self.partdata)
+        self.set_data(self.lines,self.partData)
 
     def set_data(self,lines,partdata):
         """set part data based on first word of each line"""
@@ -653,6 +651,7 @@ def import_parts(craft):
     for part in partslist:
         if os.path.isfile(ksp+partdir[part.partName][0]):                                                      # make sure the part file exists so nothing crashes
             print("\n----------------------------------------------------\n")                               # to make console output easier to look at
+            print(part.partData)
             if part.partName not in doneparts:                                                              # if part has not been imported...
                 print("Importing "+part.partName+" as "+part.part)                                                               # ...say so on the console
                 bpy.ops.import_object.ksp_mu(filepath=ksp+partdir[part.partName][0])                               # call the importer
@@ -938,6 +937,16 @@ def add_strut(part,objlist):
             anchor = child
         if "target" in child.name:
             target = child
+            target.empty_draw_type = 'SPHERE'
+            target.empty_draw_size = .25
+        if "strut" in child.name:
+            bpy.ops.object.select_all(action = 'DESELECT')
+            newstrut = child.children[0]
+            newstrut.select = True
+            scn.objects.active = newstrut
+            bpy.ops.object.make_single_user(type='SELECTED_OBJECTS', object=True, obdata=True, material=False, texture=False, animation=False)
+            bpy.ops.object.select_all(action = 'DESELECT')
+            
     anchor.delta_location = mathutils.Vector(part.attPos)
     anchor.delta_rotation_quaternion = mathutils.Quaternion(part.attRot)
     target.location = mathutils.Vector(part.tgtpos)
@@ -1236,7 +1245,7 @@ def scalefixer(craft,cursor_loc,scale):
     
 def main():
     """runs"""
-    mycraft = kspcraft('Podracer Mk1.craft')
+    mycraft = kspcraft('ADAPTIVEPARTS.craft')
     print("\n")
     print("         A          ")
     print("        / \\        ")
