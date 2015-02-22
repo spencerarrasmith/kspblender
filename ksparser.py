@@ -1,5 +1,5 @@
-# KSPBlender 0.7
-# 1/19/15
+# KSPBlender 0.75
+# 2/22/15
 # Spencer Arrasmith
 
 #############################
@@ -778,7 +778,7 @@ def import_parts(craft):
                     if len(obj.data.polygons) == 0:                                                                     # and if it's one of them stupid fake meshes with no faces
                         obj.hide = True                                                                                 # gtfo
                         obj.hide_render = True
-                    #maybe set unselectable here    
+                       
                     root = obj
                     meshrad = math.sqrt((obj.dimensions[0]/2)**2 + (obj.dimensions[1]/2)**2 + (obj.dimensions[2]/2)**2)  # find the radius of the parent Empty such that it encloses the object
                     emptysize.append(meshrad)
@@ -790,7 +790,9 @@ def import_parts(craft):
                     #bpy.ops.object.delete()                                                                            # I could just delete it
                     if obj.type != 'EMPTY':                                                                             # and if it is a mesh (the empties have already been hidden, so this is a double-tap on them)...
                         print(obj.name + " Hidden\n")                                                                       # ...let me know
-        
+                
+                action_fixer(obj)
+                
 #        for obj in objlist:
 #            if "KSP" not in obj.name and obj.type == 'MESH':
 #                if obj.data.materials:
@@ -1176,14 +1178,14 @@ def add_launchclamp(part,objlist):
                 bpy.ops.mesh.select_all(action = 'DESELECT')
                 bpy.ops.object.editmode_toggle()
             
-            if len(newgirder.modifiers) == 0:
-                bpy.ops.object.modifier_add(type='HOOK')
+            #if len(newgirder.modifiers) == 0:
+            #    bpy.ops.object.modifier_add(type='HOOK')
                 #bpy.ops.object.modifier_add(type='HOOK')
             
-            bpy.context.object.modifiers[0].name = "bottom_hook"
-            bpy.context.object.modifiers[0].object = groundmesh
-            bpy.context.object.modifiers[0].vertex_group = "bottom"
-            bpy.context.object.modifiers[0].force = 1
+            #bpy.context.object.modifiers[0].name = "bottom_hook"
+            #bpy.context.object.modifiers[0].object = groundmesh
+            #bpy.context.object.modifiers[0].vertex_group = "bottom"
+            #bpy.context.object.modifiers[0].force = 1
             
             #bpy.context.object.modifiers[1].name = "top_hook"
             #bpy.context.object.modifiers[1].object = capmesh
@@ -1248,6 +1250,10 @@ def add_launchclamp(part,objlist):
             obj.hide_render = True
         if "Cap" in obj.name and obj.type == 'EMPTY':
             obj.hide = True
+        
+        action_fixer(obj)
+        obj.select = False
+        scn.objects.active = None
     
     bpy.ops.object.select_all(action = 'DESELECT')
     
@@ -1383,6 +1389,30 @@ def scale_fixer(craft,cursor_loc,scale):
         
     bpy.ops.transform.resize()    
 
+def action_fixer(obj):
+    scn = bpy.context.scene
+    scn.objects.active = obj
+    obj.select = True
+    if obj.animation_data:
+        for track in obj.animation_data.nla_tracks:
+            for strip in track.strips:
+                strip_len = strip.frame_end - strip.frame_start
+                strip.frame_start = -strip_len-1
+                strip.frame_end = -1
+                strip.use_reverse = True
+    bpy.context.scene.frame_current=1
+    bpy.context.scene.frame_current=0
+    
+def unselectable_fixer():
+    scn = bpy.context.scene
+    for obj in bpy.data.objects:
+        if not obj.parent:
+            scn.objects.active = obj
+            obj.select = True
+            bpy.ops.object.select_grouped(type = 'CHILDREN_RECURSIVE')
+            for child in bpy.context.selected_objects:
+                child.hide_select = True
+
 def stage_grouper():
     bpy.ops.object.select_all(action = 'DESELECT')
     dstgar = []
@@ -1426,8 +1456,9 @@ def main(craftfile):
     fairing_fixer(mycraft.partslist)
     scale_fixer(mycraft,cursor_loc,10)
     stage_grouper()
+    unselectable_fixer()
     print( "All done")
     return mycraft
 
 #to_ground = 0
-mycraft = main('ADAPTIVEPARTS.craft')
+mycraft = main('Kerbal 2.craft')

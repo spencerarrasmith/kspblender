@@ -26,9 +26,9 @@ class DeletePartOperator(bpy.types.Operator):
                 bpy.ops.object.delete(use_global = False)
         return {'FINISHED'}
     
-class DeployToggleOperator(bpy.types.Operator):
-    bl_idname = "object.deploy_toggle"
-    bl_label = "Deploy Toggle"
+class ToggleDeployOperator(bpy.types.Operator):
+    bl_idname = "object.toggle_deploy"
+    bl_label = "Toggle Deploy"
 
     def execute(self,context):
         scn = bpy.context.scene
@@ -54,6 +54,26 @@ class DeployToggleOperator(bpy.types.Operator):
         for object in selection:
             object.select = True
         return {'FINISHED'}
+    
+class ToggleEditableOperator(bpy.types.Operator):
+    bl_idname = "object.Toggle_editable"
+    bl_label = "Toggle Editable"
+
+    def execute(self,context):
+        scn = bpy.context.scene
+        editable = bpy.context.selected_objects
+        
+        while editable:
+            curobj = editable.pop(0)
+            for child in curobj.children:
+                toggle.append(child)
+                
+            if curobj.type == "MESH" and curobj.hide == False:
+                scn.objects.active = curobj
+                curobj.select = True
+                curobj.hide_select = not(curobj.hide_select)
+                
+        return {'FINISHED'}
 
 #class LoadFlagPartOperator(bpy.types.Operator):
 #    bl_idname = "object.load_flag"
@@ -75,7 +95,8 @@ class DeployToggleOperator(bpy.types.Operator):
 
 
 bpy.utils.register_class(DeletePartOperator)
-bpy.utils.register_class(DeployToggleOperator)
+bpy.utils.register_class(ToggleDeployOperator)
+bpy.utils.register_class(ToggleEditableOperator)
 #bpy.utils.register_class(LoadFlagOperator)
 
 class CustomMenu(bpy.types.Menu):
@@ -95,7 +116,8 @@ class CustomMenu(bpy.types.Menu):
         layout.menu("VIEW3D_MT_transform")
         layout.separator()
         layout.operator("object.delete_part", text="Delete Part")
-        layout.operator("object.deploy_toggle", text="Deploy Toggle")
+        layout.operator("object.deploy_toggle", text="Toggle Deploy")
+        layout.operator("object.deploy_toggle", text="Toggle Editable")
         
         
 bpy.utils.register_class(CustomMenu)
