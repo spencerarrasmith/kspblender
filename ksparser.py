@@ -1,5 +1,5 @@
-# KSPBlender 0.5
-# 1/11/15
+# KSPBlender 0.7
+# 1/19/15
 # Spencer Arrasmith
 
 #############################
@@ -654,7 +654,7 @@ def import_parts(craft):
                 newpart = bpy.context.active_object                                                             # set the imported part object to active. from here on, part refers to the part data structure and object to the blender object
                 newpart.select = True
                 newpart.name = part.part                                                                        # rename the object according to the part name (including the number)
-                newpart.location = mathutils.Vector(part.pos)+cursor_loc                                                          # move the object
+                newpart.location = mathutils.Vector(part.pos)#+cursor_loc                                                          # move the object
                 newpart.rotation_quaternion = part.rotQ                                                         # rotate the object
                 if part.partName in right_scale:
                     newpart.select = True
@@ -719,13 +719,13 @@ def import_parts(craft):
                 bpy.context.scene.objects.active = newpart
                 print(bpy.context.active_object)
                 newpart.name = part.part                                                                        # rename it
-                newpart.location = mathutils.Vector(part.pos)+cursor_loc                                                          # move it
+                newpart.location = mathutils.Vector(part.pos)#+cursor_loc                                                          # move it
                 newpart.rotation_quaternion = part.rotQ                                                         # rotate it
                 for obj in hiddenlist:                                                                          # hide all that annoying stuff again
                     obj.hide = True
         
         else:
-            print("Failed to load "+part.partName+"... gotta fix that\n")                                   # if the part doesn't exist, let me know
+            print("Failed to load "+part.partName+"... Probably an unsupported mod. Sorry!\n")                                   # if the part doesn't exist, let me know
         
         if part.partName not in doneparts:                                                                  # if the part hasn't been imported before...
             doneparts[part.partName] = part.part                                                            # ...it has now
@@ -1032,7 +1032,7 @@ def add_fuelline(part,objlist):
         const = newfuelline.constraints.new("STRETCH_TO")
     else:
         const = newfuelline.constraints.new("STRETCH_TO")
-    const.target = target
+    const.target = target.children[1]
     const.bulge = 0  
 
     anchor.delta_location = mathutils.Vector(part.attPos)
@@ -1091,7 +1091,45 @@ def add_launchclamp(part,objlist):
     print(to_ground)
 
     mat = root.matrix_local
-    
+    for child in root.children[0].children:
+        if "girder" in child.name:
+            girder = child
+            for grandchild in girder.children:
+                if "ground" in grandchild.name:
+                    ground = grandchild
+                    groundmesh = ground.children[0]
+                    bpy.ops.object.select_all(action = 'DESELECT')
+                    scn.objects.active = ground
+                    ground.select = True
+                    ground.delta_location = (0,.94,0) 
+                    if not len(ground.constraints):
+                        const = ground.constraints.new("LIMIT_LOCATION")
+                        const.use_min_z  = True
+                        const.use_max_z  = True
+                        const.min_z  = 5
+                        const.max_z  = 5
+                    bpy.ops.object.select_all(action = 'DESELECT')
+                    ground.location = (ground.location[0],ground.location[1],-mat.to_translation()[2]-ground.location[2])
+        if "ground" in child.name:
+            ground = child
+            groundmesh = ground.children[0]
+            ground.parent = girder
+            bpy.ops.object.select_all(action = 'DESELECT')
+            scn.objects.active = ground
+            ground.select = True
+            ground.delta_location = (0,.94,0) 
+            if not len(ground.constraints):
+                const = ground.constraints.new("LIMIT_LOCATION")
+                const.use_min_z  = True
+                const.use_max_z  = True
+                const.min_z  = 5
+                const.max_z  = 5
+            bpy.ops.object.select_all(action = 'DESELECT')
+            ground.location = (ground.location[0],ground.location[1],-mat.to_translation()[2]-ground.location[2])
+        if "cap" in child.name:
+            for grandchild in child.children:
+                if "_mesh" in grandchild.name:
+                    capmesh = grandchild
     for child in root.children[0].children:
         if "girder" in child.name:
             girder = child
@@ -1100,25 +1138,66 @@ def add_launchclamp(part,objlist):
             newgirder.select = True
             scn.objects.active = newgirder
             bpy.ops.object.make_single_user(type='SELECTED_OBJECTS', object=True, obdata=True, material=False, texture=False, animation=False)
+            
+            bpy.ops.object.mode_set(mode='EDIT')                                                                # go into edit mode
+            bpy.ops.mesh.remove_doubles(threshold = 0.0001)                                                     # remove double vertices
+            bpy.ops.mesh.normals_make_consistent(inside = False)                                                # fix normals
+            bpy.ops.mesh.select_all(action = 'DESELECT')
+            bpy.ops.object.mode_set(mode='OBJECT')                                                              # leave edit mode
+            
+            botverts = [0,3,4,8,9,10,11,12,13,14,15,25,26,28,29,31]
+            topverts = [1,2,5,6,7,16,17,18,19,20,21,22,23,24,27,30]
+            bpy.ops.object.select_all(action = 'DESELECT')
+            scn.objects.active = newgirder
+            newgirder.select = True
+            
+            
+            for vert in botverts:
+                newgirder.data.vertices[vert].select = True
+                newgirder.data.vertices[vert].co.y = -mat.to_translation()[2]
+            if not len(newgirder.vertex_groups):
+                bpy.ops.object.vertex_group_add()
+                newgirder.vertex_groups[0].name = 'bottom'
+                bpy.ops.object.vertex_group_set_active(group = 'bottom')
+                bpy.ops.object.editmode_toggle()
+                bpy.ops.object.vertex_group_assign()
+                #bpy.ops.view3d.snap_cursor_to_selected()
+                
+                bpy.ops.mesh.select_all(action = 'DESELECT')
+                bpy.ops.object.editmode_toggle()
+            
+                for vert in topverts:
+                    newgirder.data.vertices[vert].select = True
+                bpy.ops.object.vertex_group_add()
+                newgirder.vertex_groups[1].name = 'top'
+                bpy.ops.object.vertex_group_set_active(group = 'top')
+                bpy.ops.object.editmode_toggle()
+                bpy.ops.object.vertex_group_assign()
+                bpy.ops.mesh.select_all(action = 'DESELECT')
+                bpy.ops.object.editmode_toggle()
+            
+            if len(newgirder.modifiers) == 0:
+                bpy.ops.object.modifier_add(type='HOOK')
+                #bpy.ops.object.modifier_add(type='HOOK')
+            
+            bpy.context.object.modifiers[0].name = "bottom_hook"
+            bpy.context.object.modifiers[0].object = groundmesh
+            bpy.context.object.modifiers[0].vertex_group = "bottom"
+            bpy.context.object.modifiers[0].force = 1
+            
+            #bpy.context.object.modifiers[1].name = "top_hook"
+            #bpy.context.object.modifiers[1].object = capmesh
+            #bpy.context.object.modifiers[1].vertex_group = "top"
+            #bpy.context.object.modifiers[1].force = 0
+            
             bpy.ops.object.select_all(action = 'DESELECT')   
-        if "ground" in child.name:
-            ground = child
-            ground.parent = girder
-            bpy.ops.object.select_all(action = 'DESELECT')
-            scn.objects.active = ground
-            ground.select = True
-            const = ground.constraints.new("LIMIT_LOCATION")
-            const.use_min_z  = True
-            const.use_max_z  = True
-            const.min_z  = 5
-            const.max_z  = 5
-            bpy.ops.object.select_all(action = 'DESELECT')
-            ground.location = (ground.location[0],ground.location[1],-mat.to_translation()[2]-ground.location[2])
-            ground.delta_location = (0,.94,0)      
-
+            
+        
+        
     girder.rotation_mode = 'XYZ'
     mate = mat.to_euler()
     girder.rotation_euler = mathutils.Vector((-mate[0],0,mate[1]))
+    
     
     #bpy.ops.object.select_all(action = 'DESELECT')
     #newroot = root.children[0]
@@ -1169,10 +1248,12 @@ def add_launchclamp(part,objlist):
             obj.hide_render = True
         if "Cap" in obj.name and obj.type == 'EMPTY':
             obj.hide = True
-            
-    verts = [0,3,4,8,9,10,11,12,13,14,15,25,26,28,29,31]
-    for vert in verts:
-        newgirder.data.vertices[vert].co.y = -mat.to_translation()[2]
+    
+    bpy.ops.object.select_all(action = 'DESELECT')
+    
+    #for vert in verts:
+        #newgirder.data.vertices[vert].co.y = -mat.to_translation()[2]
+        
     #ground.delta_location = mathutils.Vector((0,0,-1))
     
 def materialfixer(obj,part):
@@ -1290,22 +1371,36 @@ def materialfixer(obj,part):
                 print('Failed to find bump texture')
 
     
-def scalefixer(craft,cursor_loc,scale):
+def scale_fixer(craft,cursor_loc,scale):
     scn = bpy.context.scene
     for part in craft.partslist:
         obj = bpy.data.objects[part.part]
         scn.objects.active = obj
-        obj_loc = obj.location - cursor_loc
+        obj_loc = obj.location# - cursor_loc
         obj_sca = obj.scale
         obj.location = (scale*obj_loc[0],scale*obj_loc[1],scale*obj_loc[2])
         obj.scale = (scale*obj_sca[0],scale*obj_sca[1],scale*obj_sca[2])
         
     bpy.ops.transform.resize()    
 
+def stage_grouper():
+    bpy.ops.object.select_all(action = 'DESELECT')
+    dstgar = []
+    for obj in bpy.data.objects:
+        if len(obj.values())>5:
+            if obj['dstg'] not in dstgar:
+                dstgar.append(obj['dstg'])
+    for i in dstgar:
+        for obj in bpy.data.objects:
+            if len(obj.values())>5:
+                if obj['dstg'] == i:
+                    obj.select = True
+        bpy.ops.group.create()
+        bpy.ops.object.select_all(action = 'DESELECT')
     
-def main():
+def main(craftfile):
     """runs"""
-    mycraft = kspcraft('Kerbal X.craft')
+    mycraft = kspcraft(craftfile)
     print("\n")
     print("         A          ")
     print("        / \\        ")
@@ -1325,13 +1420,14 @@ def main():
     print(mycraft.ship + ' ready for takeoff\n')
     print(str(mycraft.num_parts()) + ' parts found...')
     
-    #cursor_loc = get_cursor_location()
-    cursor_loc = mathutils.Vector((0,0,0))
+    cursor_loc = get_cursor_location()
+    #cursor_loc = mathutils.Vector((0,0,0))
     import_parts(mycraft)
     fairing_fixer(mycraft.partslist)
-    scalefixer(mycraft,cursor_loc,10)
+    scale_fixer(mycraft,cursor_loc,10)
+    stage_grouper()
     print( "All done")
     return mycraft
 
-to_ground = 0
-mycraft = main()
+#to_ground = 0
+mycraft = main('ADAPTIVEPARTS.craft')

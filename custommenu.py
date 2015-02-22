@@ -1,23 +1,70 @@
-import bpy, time, groupdelete
+import bpy, time
 
 class DeletePartOperator(bpy.types.Operator):
     bl_idname = "object.delete_part"
     bl_label = "Delete Part"
 
     def execute(self,context):
-        groupdelete.main()
+        scn = bpy.context.scene
+        kill = bpy.context.selected_objects
+
+        for obj in kill:
+            if obj.parent == None:
+                scn.objects.active = obj
+                queue = [obj]
+
+                while queue:
+                    current = queue.pop(0)
+                    current.select = True
+                    if not current.is_visible(scn):
+                        scn.objects.active = current
+                        current.hide = False
+                        current.select = True
+                    for child in current.children:
+                        queue.append(child)
+                        
+                bpy.ops.object.delete(use_global = False)
+        return {'FINISHED'}
+    
+class DeployToggleOperator(bpy.types.Operator):
+    bl_idname = "object.deploy_toggle"
+    bl_label = "Deploy Toggle"
+
+    def execute(self,context):
+        scn = bpy.context.scene
+        toggle = bpy.context.selected_objects
+        selection = toggle
+        
+        while toggle:
+            curobj = toggle.pop(0)
+            for child in curobj.children:
+                toggle.append(child)
+                
+            scn.objects.active = curobj
+            curobj.select = True
+            if curobj.animation_data:
+                for track in curobj.animation_data.nla_tracks:
+                    for strip in track.strips:
+                        strip.use_reverse = not(strip.use_reverse)
+                        
+            curobj.select = False
+        bpy.ops.object.select_all(action = 'DESELECT')
+        bpy.context.scene.frame_current=1
+        bpy.context.scene.frame_current=0
+        for object in selection:
+            object.select = True
         return {'FINISHED'}
 
-class LoadFlagPartOperator(bpy.types.Operator):
-    bl_idname = "object.load_flag"
-    bl_label = "Load Flag"
+#class LoadFlagPartOperator(bpy.types.Operator):
+#    bl_idname = "object.load_flag"
+#    bl_label = "Load Flag"
     
-    filename = StringProperty(name="Flag Image", subtype="FILE_PATH"
+    #filename = StringProperty(name="Flag Image", subtype="FILE_PATH")
     
     
-    def execute(self,context):
-        loadflag.main()
-        return {'FINISHED'}
+#    def execute(self,context):
+#        loadflag.main()
+#        return {'FINISHED'}
     
 # EnableEditingOperator
 # DisableEditingOperator
@@ -28,7 +75,8 @@ class LoadFlagPartOperator(bpy.types.Operator):
 
 
 bpy.utils.register_class(DeletePartOperator)
-bpy.utils.register_class(LoadFlagOperator)
+bpy.utils.register_class(DeployToggleOperator)
+#bpy.utils.register_class(LoadFlagOperator)
 
 class CustomMenu(bpy.types.Menu):
     bl_idname = "OBJECT_MT_CustomMenu"
@@ -47,16 +95,16 @@ class CustomMenu(bpy.types.Menu):
         layout.menu("VIEW3D_MT_transform")
         layout.separator()
         layout.operator("object.delete_part", text="Delete Part")
-        layout.operator("object.load_flag", text="Load Flag")
+        layout.operator("object.deploy_toggle", text="Deploy Toggle")
         
         
 bpy.utils.register_class(CustomMenu)
 
 km = bpy.context.window_manager.keyconfigs.default.keymaps['3D View']
 
-for kmi in km.keymap_items:
-    if kmi.idname == "wm.call_menu" and kmi.properties.name == "OBJECT_MT_CustomMenu":
-        km.keymap_items.remove(kmi)
+#for kmi in km.keymap_items:
+    #if kmi.idname == "wm.call_menu" and kmi.properties.name == "OBJECT_MT_CustomMenu":
+        #km.keymap_items.remove(kmi)
         #print("lol it found something that doesn't even exist yet")
 
 kmi = km.keymap_items.new('wm.call_menu', 'K', 'PRESS')
