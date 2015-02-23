@@ -1,4 +1,4 @@
-import bpy, time
+import bpy, time, ksparser
 
 class DeletePartOperator(bpy.types.Operator):
     bl_idname = "object.delete_part"
@@ -10,16 +10,14 @@ class DeletePartOperator(bpy.types.Operator):
 
         for obj in kill:
             if obj.parent == None:
-                scn.objects.active = obj
                 queue = [obj]
 
                 while queue:
                     current = queue.pop(0)
+                    current.hide_select = False
+                    current.hide = False
                     current.select = True
-                    if not current.is_visible(scn):
-                        scn.objects.active = current
-                        current.hide = False
-                        current.select = True
+                    scn.objects.active = current
                     for child in current.children:
                         queue.append(child)
                         
@@ -56,7 +54,7 @@ class ToggleDeployOperator(bpy.types.Operator):
         return {'FINISHED'}
     
 class ToggleEditableOperator(bpy.types.Operator):
-    bl_idname = "object.Toggle_editable"
+    bl_idname = "object.toggle_editable"
     bl_label = "Toggle Editable"
 
     def execute(self,context):
@@ -66,13 +64,21 @@ class ToggleEditableOperator(bpy.types.Operator):
         while editable:
             curobj = editable.pop(0)
             for child in curobj.children:
-                toggle.append(child)
+                editable.append(child)
                 
             if curobj.type == "MESH" and curobj.hide == False:
                 scn.objects.active = curobj
                 curobj.select = True
                 curobj.hide_select = not(curobj.hide_select)
                 
+        return {'FINISHED'}
+
+class ImportCraftOperator(bpy.types.Operator):
+    bl_idname = "object.import_craft"
+    bl_label = "Import Craft"
+   
+    def execute(self,context):
+        ksparser.main("Kerbal 2.craft")
         return {'FINISHED'}
 
 #class LoadFlagPartOperator(bpy.types.Operator):
@@ -97,6 +103,7 @@ class ToggleEditableOperator(bpy.types.Operator):
 bpy.utils.register_class(DeletePartOperator)
 bpy.utils.register_class(ToggleDeployOperator)
 bpy.utils.register_class(ToggleEditableOperator)
+bpy.utils.register_class(ImportCraftOperator)
 #bpy.utils.register_class(LoadFlagOperator)
 
 class CustomMenu(bpy.types.Menu):
@@ -116,8 +123,9 @@ class CustomMenu(bpy.types.Menu):
         layout.menu("VIEW3D_MT_transform")
         layout.separator()
         layout.operator("object.delete_part", text="Delete Part")
-        layout.operator("object.deploy_toggle", text="Toggle Deploy")
-        layout.operator("object.deploy_toggle", text="Toggle Editable")
+        layout.operator("object.toggle_deploy", text="Toggle Deploy")
+        layout.operator("object.toggle_editable", text="Toggle Editable")
+        layout.operator("object.import_craft", text="Import Craft")
         
         
 bpy.utils.register_class(CustomMenu)

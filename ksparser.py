@@ -1156,7 +1156,8 @@ def add_launchclamp(part,objlist):
             
             for vert in botverts:
                 newgirder.data.vertices[vert].select = True
-                newgirder.data.vertices[vert].co.y = -mat.to_translation()[2]
+                #newgirder.data.vertices[vert].co.y = -mat.to_translation()[2]
+                newgirder.data.vertices[vert].co.y = 0
             if not len(newgirder.vertex_groups):
                 bpy.ops.object.vertex_group_add()
                 newgirder.vertex_groups[0].name = 'bottom'
@@ -1178,14 +1179,14 @@ def add_launchclamp(part,objlist):
                 bpy.ops.mesh.select_all(action = 'DESELECT')
                 bpy.ops.object.editmode_toggle()
             
-            #if len(newgirder.modifiers) == 0:
-            #    bpy.ops.object.modifier_add(type='HOOK')
+            if len(newgirder.modifiers) == 0:
+                bpy.ops.object.modifier_add(type='HOOK')
                 #bpy.ops.object.modifier_add(type='HOOK')
             
-            #bpy.context.object.modifiers[0].name = "bottom_hook"
-            #bpy.context.object.modifiers[0].object = groundmesh
-            #bpy.context.object.modifiers[0].vertex_group = "bottom"
-            #bpy.context.object.modifiers[0].force = 1
+            bpy.context.object.modifiers[0].name = "bottom_hook"
+            bpy.context.object.modifiers[0].object = groundmesh
+            bpy.context.object.modifiers[0].vertex_group = "bottom"
+            bpy.context.object.modifiers[0].force = 1
             
             #bpy.context.object.modifiers[1].name = "top_hook"
             #bpy.context.object.modifiers[1].object = capmesh
@@ -1456,7 +1457,7 @@ def main(craftfile):
     fairing_fixer(mycraft.partslist)
     scale_fixer(mycraft,cursor_loc,10)
     stage_grouper()
-    unselectable_fixer()
+    #unselectable_fixer()
     print( "All done")
     return mycraft
 
