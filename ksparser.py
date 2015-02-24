@@ -1,7 +1,14 @@
 # KSPBlender 0.75
-# 2/22/15
+# 2/23/15
 # Spencer Arrasmith
 
+#############################
+### IMPORTANT STUFF
+#############################
+
+kspexedirectory = "S:\\Games\\SteamApps\\common\\Kerbal Space Program"
+craftfile = "Kerbal 2.craft"
+ 
 #############################
 ### IMPORT STUFF
 #############################
@@ -20,7 +27,7 @@ os.chdir(bpy.path.abspath("//"))
 ### DIRECTORY STUFF
 #############################
 
-kspexedirectory = "S:\\Games\\SteamApps\\common\\Kerbal Space Program"
+
 
 def partdirectory():
     """Makes a big stupid dictionary of where each part is located. Making this function sucked."""
@@ -1012,6 +1019,9 @@ def add_fuelline(part,objlist):
     scn = bpy.context.scene
     
     root = bpy.data.objects[part.part]
+    root.rotation_quaternion = mathutils.Quaternion(part.rotQ)
+    print(root.rotation_quaternion)
+    print(part.rotQ)
     root.children[0].hide = True
     for child in root.children[0].children:
         if "anchor" in child.name:
@@ -1038,7 +1048,7 @@ def add_fuelline(part,objlist):
     const.bulge = 0  
 
     anchor.delta_location = mathutils.Vector(part.attPos)
-    anchor.delta_rotation_quaternion = mathutils.Quaternion(part.attRot)
+    anchor.rotation_quaternion = mathutils.Quaternion(part.attRot)
     target.location = mathutils.Vector(part.tgtpos)
     target.rotation_quaternion = mathutils.Quaternion(part.tgtrot)
     
@@ -1156,8 +1166,9 @@ def add_launchclamp(part,objlist):
             
             for vert in botverts:
                 newgirder.data.vertices[vert].select = True
-                #newgirder.data.vertices[vert].co.y = -mat.to_translation()[2]
-                newgirder.data.vertices[vert].co.y = 0
+                newgirder.data.vertices[vert].co.y = -mat.to_translation()[2]
+                #newgirder.data.vertices[vert].co.y = newgirder.data.vertices[1].co.y
+                newgirder.data.vertices[vert].select = False
             if not len(newgirder.vertex_groups):
                 bpy.ops.object.vertex_group_add()
                 newgirder.vertex_groups[0].name = 'bottom'
@@ -1462,4 +1473,4 @@ def main(craftfile):
     return mycraft
 
 #to_ground = 0
-mycraft = main('Kerbal 2.craft')
+mycraft = main(craftfile)

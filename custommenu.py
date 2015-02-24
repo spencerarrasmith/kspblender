@@ -1,5 +1,24 @@
 import bpy, time, ksparser
 
+class SelectShipOperator(bpy.types.Operator):
+    bl_idname = "object.select_ship"
+    bl_label = "Select Ship"
+    
+    def execute(self,context):
+        scn = bpy.context.scene
+        selected = bpy.context.selected_objects
+        shippart = selected.pop(0)
+        bpy.ops.object.select_all(action = 'DESELECT')
+        shippart.select = True
+        
+        for obj in bpy.data.objects:
+            if not obj.parent:
+                if obj["ship"] == shippart["ship"]:
+                    obj.select = True
+                    
+        return {'FINISHED'}
+        
+
 class DeletePartOperator(bpy.types.Operator):
     bl_idname = "object.delete_part"
     bl_label = "Delete Part"
@@ -100,10 +119,11 @@ class ImportCraftOperator(bpy.types.Operator):
 # SetMaterialAllOperator
 
 
+bpy.utils.register_class(SelectShipOperator)
 bpy.utils.register_class(DeletePartOperator)
 bpy.utils.register_class(ToggleDeployOperator)
 bpy.utils.register_class(ToggleEditableOperator)
-bpy.utils.register_class(ImportCraftOperator)
+#bpy.utils.register_class(ImportCraftOperator)
 #bpy.utils.register_class(LoadFlagOperator)
 
 class CustomMenu(bpy.types.Menu):
@@ -122,10 +142,11 @@ class CustomMenu(bpy.types.Menu):
         layout.separator()
         layout.menu("VIEW3D_MT_transform")
         layout.separator()
+        layout.operator("object.select_ship", text="Select Ship")
         layout.operator("object.delete_part", text="Delete Part")
         layout.operator("object.toggle_deploy", text="Toggle Deploy")
         layout.operator("object.toggle_editable", text="Toggle Editable")
-        layout.operator("object.import_craft", text="Import Craft")
+        #layout.operator("object.import_craft", text="Import Craft")
         
         
 bpy.utils.register_class(CustomMenu)
