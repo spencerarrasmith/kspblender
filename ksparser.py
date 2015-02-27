@@ -7,7 +7,7 @@
 #############################
 
 kspexedirectory = "S:\\Games\\SteamApps\\common\\Kerbal Space Program"
-craftfile = "Kerbal 2.craft"
+craftfile = "Spaceballer.craft"
  
 #############################
 ### IMPORT STUFF
@@ -296,9 +296,9 @@ right_scale['liquidEngine'] = mathutils.Vector((1.25,1.25,1.25))
 right_scale['liquidEngine2'] = mathutils.Vector((1.25,1.25,1.25))
 right_scale['science.module'] = mathutils.Vector((1.25,1.25,1.25))
 right_scale['fuelTank.long'] = mathutils.Vector((1.25,1.25,1.25))
-right_scale['MK1Fuselage'] = mathutils.Vector((1.25,1.25,1.25))
-right_scale['MK1FuselageStructural'] = mathutils.Vector((1.25,1.25,1.25))
-right_scale['MK1IntakeFuselage'] = mathutils.Vector((1.25,1.25,1.25))
+right_scale['Mk1Fuselage'] = mathutils.Vector((1.25,1.25,1.25))
+right_scale['Mk1FuselageStructural'] = mathutils.Vector((1.25,1.25,1.25))
+right_scale['Mk1IntakeFuselage'] = mathutils.Vector((1.25,1.25,1.25))
 right_scale['nacelleBody'] = mathutils.Vector((1.25,1.25,1.25))
 right_scale['radialEngineBody'] = mathutils.Vector((1.25,1.25,1.25))
 right_scale['turboFanEngine'] = mathutils.Vector((1.25,1.25,1.25))
