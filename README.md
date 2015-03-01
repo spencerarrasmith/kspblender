@@ -1,5 +1,6 @@
-kspblender
+kspblender has a new home: https://github.com/Dasoccerguy/io_kspblender
 ==========
+
 
 KSP in Blender
 
