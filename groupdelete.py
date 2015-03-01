@@ -4,7 +4,7 @@ scn = bpy.context.scene
 kill = bpy.context.selected_objects
 
 for obj in kill:
-    if obj.parent == None:
+    if obj.parent is None:
         scn.objects.active = obj
         queue = [obj]
 
@@ -17,5 +17,5 @@ for obj in kill:
                 current.select = True
             for child in current.children:
                 queue.append(child)
-                
+
         #bpy.ops.object.delete(use_global = False)
